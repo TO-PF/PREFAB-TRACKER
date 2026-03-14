@@ -137,8 +137,8 @@
   tbody tr.selected-row td { border-bottom-color: rgba(0,200,255,0.15); }
   td { padding: 10px 14px; vertical-align: middle; white-space: nowrap; }
   .td-id { font-family: var(--mono); font-size: 11px; color: var(--accent); }
-  .td-pkg { font-family: var(--mono); font-size: 11px; color: var(--accent2); }
-  .td-lbs { font-family: var(--mono); font-size: 11px; color: var(--warning); }
+  .td-pkg { font-family: var(--mono); font-size: 11px; color: var(--accent); }
+  .td-lbs { font-family: var(--mono); font-size: 11px; color: var(--accent); }
   .col-select { width: 40px; text-align: center; }
   .row-check { width: 16px; height: 16px; cursor: pointer; accent-color: var(--accent); }
 
@@ -395,7 +395,7 @@
       <select id="filterPackage" onchange="applyFilters()"><option value="">All</option></select>
     </div>
     <div class="filter-group">
-      <span class="filter-label">LBS Level</span>
+      <span class="filter-label">Level</span>
       <select id="filterLBS" onchange="applyFilters()"><option value="">All</option></select>
     </div>
     <div class="filter-group">
@@ -460,7 +460,7 @@
       <div id="breakdown-package"></div>
     </div>
     <div class="breakdown-card">
-      <div class="breakdown-title">By LBS Level</div>
+      <div class="breakdown-title">By Level</div>
       <div id="breakdown-lbs"></div>
     </div>
   </div>
@@ -1029,31 +1029,34 @@
     const prefabVal   = document.querySelector('input[name="bulk_prefab"]:checked').value;
     const installVal  = document.querySelector('input[name="bulk_installed"]:checked').value;
 
+    // Nothing to do if no fields selected
+    if (!releaseDate && !shipDate && prefabVal === 'no-change' && installVal === 'no-change') {
+      showToast('No changes selected — pick at least one field to update');
+      return;
+    }
+
     const btn = document.getElementById('bulkApplyBtn');
     btn.disabled = true; btn.textContent = 'Saving...';
 
-    const ids = [...selectedIds];
-    const updates = [];
-
+    // Build an array of {id, ...dbFields} for every selected assembly
+    const upsertRows = [];
     assemblies.forEach(a => {
       if (!selectedIds.has(a.id)) return;
-      if (releaseDate)              a.releaseDate = releaseDate;
-      if (shipDate)                 a.shipDate    = shipDate;
-      if (prefabVal  !== 'no-change') a.prefabDone = prefabVal  === 'true';
-      if (installVal !== 'no-change') a.installed  = installVal === 'true';
-      updates.push(localToDb(a));
+      if (releaseDate)                a.releaseDate = releaseDate;
+      if (shipDate)                   a.shipDate    = shipDate;
+      if (prefabVal  !== 'no-change') a.prefabDone  = prefabVal  === 'true';
+      if (installVal !== 'no-change') a.installed   = installVal === 'true';
+      upsertRows.push({ id: a.id, ...localToDb(a) });
     });
 
-    // Upsert all changed rows in one call
-    const { error } = await sb.from('assemblies').upsert(
-      ids.map((id,i) => ({ id, ...updates[i] }))
-    );
+    const { error } = await sb.from('assemblies').upsert(upsertRows);
 
     btn.disabled = false; btn.textContent = 'Apply to Selected';
 
-    if (error) { showToast('Bulk save failed: '+error.message, true); return; }
-    closeBulkModal(); render();
-    showToast(`✓ Updated ${ids.length} assemblies`);
+    if (error) { showToast('Bulk save failed: ' + error.message, true); return; }
+    closeBulkModal();
+    render();
+    showToast(`✓ Updated ${upsertRows.length} assemblies`);
   }
 
   async function bulkDelete() {
