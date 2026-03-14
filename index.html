@@ -1,0 +1,1080 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Prefab Assembly Tracker</title>
+<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Barlow+Condensed:wght@300;400;600;700;900&family=Barlow:wght@300;400;500&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+  :root {
+    --bg: #0a0e14;
+    --surface: #111720;
+    --surface2: #182030;
+    --border: #1e2d42;
+    --accent: #00c8ff;
+    --accent2: #ff6b35;
+    --success: #00e57a;
+    --warning: #ffc107;
+    --danger: #ff4757;
+    --text: #c8d8e8;
+    --text-dim: #5a7a9a;
+    --text-bright: #eaf4ff;
+    --mono: 'Share Tech Mono', monospace;
+    --sans: 'Barlow Condensed', sans-serif;
+    --body: 'Barlow', sans-serif;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--bg); color: var(--text); font-family: var(--body); min-height: 100vh; overflow-x: hidden; }
+  body::before {
+    content: ''; position: fixed; inset: 0;
+    background-image: linear-gradient(rgba(0,200,255,0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(0,200,255,0.03) 1px, transparent 1px);
+    background-size: 40px 40px; pointer-events: none; z-index: 0;
+  }
+
+  /* HEADER */
+  header {
+    position: relative; z-index: 10;
+    background: linear-gradient(180deg, #0d1520 0%, transparent 100%);
+    border-bottom: 1px solid var(--border);
+    padding: 20px 32px; display: flex; align-items: center; justify-content: space-between; gap: 24px;
+  }
+  .logo-block { display: flex; align-items: center; gap: 16px; }
+  .logo-icon {
+    width: 44px; height: 44px; border: 2px solid var(--accent);
+    display: grid; place-items: center;
+    clip-path: polygon(8px 0%, 100% 0%, 100% calc(100% - 8px), calc(100% - 8px) 100%, 0% 100%, 0% 8px);
+    background: rgba(0,200,255,0.08);
+  }
+  .logo-icon svg { width: 22px; height: 22px; color: var(--accent); }
+  .logo-text h1 { font-family: var(--sans); font-weight: 900; font-size: 22px; letter-spacing: 3px; color: var(--text-bright); text-transform: uppercase; }
+  .logo-text p { font-family: var(--mono); font-size: 10px; color: var(--accent); letter-spacing: 2px; margin-top: 2px; }
+  .header-actions { display: flex; align-items: center; gap: 12px; }
+
+  /* SYNC STATUS */
+  .sync-status {
+    display: flex; align-items: center; gap: 7px;
+    font-family: var(--mono); font-size: 10px; letter-spacing: 1px;
+    color: var(--text-dim); padding: 6px 12px; border: 1px solid var(--border);
+  }
+  .sync-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--text-dim); transition: all 0.3s; }
+  .sync-status.connected .sync-dot { background: var(--success); box-shadow: 0 0 6px var(--success); }
+  .sync-status.connected { color: var(--success); border-color: rgba(0,229,122,0.3); }
+  .sync-status.syncing .sync-dot { background: var(--warning); box-shadow: 0 0 6px var(--warning); animation: pulse 1s infinite; }
+  .sync-status.error .sync-dot { background: var(--danger); }
+  .sync-status.error { color: var(--danger); border-color: rgba(255,71,87,0.3); }
+  @keyframes pulse { 0%,100% { opacity:1; } 50% { opacity:0.3; } }
+
+  .btn {
+    font-family: var(--sans); font-weight: 600; font-size: 13px; letter-spacing: 2px;
+    text-transform: uppercase; padding: 9px 20px; border: none; cursor: pointer; transition: all 0.2s;
+    clip-path: polygon(6px 0%, 100% 0%, calc(100% - 6px) 100%, 0% 100%);
+  }
+  .btn-primary { background: var(--accent); color: #000; }
+  .btn-primary:hover { background: #33d4ff; transform: translateY(-1px); }
+  .btn-secondary { background: transparent; color: var(--accent); border: 1px solid var(--accent); clip-path: none; }
+  .btn-secondary:hover { background: rgba(0,200,255,0.1); }
+  .btn-danger { background: var(--danger); color: #fff; }
+  .btn-danger:hover { background: #ff6b7a; }
+  .btn:disabled { opacity: 0.4; cursor: not-allowed; transform: none !important; }
+
+  .csv-input-label {
+    display: flex; align-items: center; gap: 8px;
+    font-family: var(--sans); font-weight: 600; font-size: 13px; letter-spacing: 2px; text-transform: uppercase;
+    padding: 9px 20px; border: 1px dashed var(--border); color: var(--text-dim); cursor: pointer; transition: all 0.2s;
+  }
+  .csv-input-label:hover { border-color: var(--accent); color: var(--accent); }
+  #csvFile { display: none; }
+
+  main { position: relative; z-index: 1; padding: 28px 32px; max-width: 1600px; margin: 0 auto; }
+
+  /* STATS */
+  .stats-bar { display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; margin-bottom: 28px; }
+  .stat-card { background: var(--surface); border: 1px solid var(--border); padding: 16px 20px; position: relative; overflow: hidden; }
+  .stat-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px; background: var(--accent-color, var(--accent)); }
+  .stat-card .label { font-family: var(--mono); font-size: 10px; letter-spacing: 2px; color: var(--text-dim); text-transform: uppercase; margin-bottom: 8px; }
+  .stat-card .value { font-family: var(--sans); font-size: 32px; font-weight: 900; color: var(--text-bright); line-height: 1; }
+  .stat-card .pct { font-family: var(--mono); font-size: 11px; color: var(--accent-color, var(--accent)); margin-top: 4px; }
+
+  /* PROGRESS */
+  .progress-wrap { background: var(--surface); border: 1px solid var(--border); padding: 20px 24px; margin-bottom: 28px; }
+  .progress-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+  .progress-title { font-family: var(--sans); font-weight: 700; font-size: 14px; letter-spacing: 3px; text-transform: uppercase; color: var(--text-bright); }
+  .progress-stages { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+  .stage-label { font-family: var(--mono); font-size: 10px; letter-spacing: 1px; color: var(--text-dim); margin-bottom: 6px; display: flex; justify-content: space-between; }
+  .stage-label span:last-child { color: var(--text); }
+  .bar-track { height: 6px; background: var(--border); position: relative; }
+  .bar-fill { height: 100%; transition: width 0.5s ease; position: relative; }
+  .bar-fill::after { content: ''; position: absolute; right: 0; top: -3px; width: 2px; height: 12px; background: inherit; opacity: 0.6; }
+
+  /* FILTER */
+  .filter-bar { display: flex; gap: 12px; align-items: center; margin-bottom: 20px; flex-wrap: wrap; }
+  .filter-group { display: flex; align-items: center; gap: 8px; }
+  .filter-label { font-family: var(--mono); font-size: 10px; letter-spacing: 2px; color: var(--text-dim); text-transform: uppercase; white-space: nowrap; }
+  select, input[type="text"] { background: var(--surface); border: 1px solid var(--border); color: var(--text); font-family: var(--mono); font-size: 12px; padding: 7px 12px; outline: none; transition: border-color 0.2s; min-width: 120px; }
+  select:focus, input[type="text"]:focus { border-color: var(--accent); }
+  select option { background: var(--surface); }
+  .search-input { min-width: 200px; }
+  .filter-divider { width: 1px; height: 28px; background: var(--border); margin: 0 4px; }
+
+  /* BULK TOOLBAR */
+  .bulk-toolbar { display: none; align-items: center; gap: 12px; background: #0d1e30; border: 1px solid var(--accent); border-bottom: none; padding: 10px 16px; flex-wrap: wrap; }
+  .bulk-toolbar.visible { display: flex; }
+  .bulk-count { font-family: var(--mono); font-size: 11px; color: var(--accent); white-space: nowrap; margin-right: 4px; }
+  .bulk-divider { width: 1px; height: 22px; background: var(--border); }
+
+  /* TABLE */
+  .table-wrap { background: var(--surface); border: 1px solid var(--border); overflow: auto; max-height: calc(100vh - 480px); min-height: 300px; }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  thead { position: sticky; top: 0; z-index: 5; }
+  thead th { background: #0d1825; border-bottom: 2px solid var(--accent); padding: 12px 14px; text-align: left; font-family: var(--mono); font-size: 10px; letter-spacing: 2px; color: var(--accent); text-transform: uppercase; white-space: nowrap; cursor: pointer; user-select: none; transition: background 0.15s; }
+  thead th:hover { background: rgba(0,200,255,0.08); }
+  thead th .sort-icon { margin-left: 4px; opacity: 0.4; }
+  tbody tr { border-bottom: 1px solid rgba(30,45,66,0.7); transition: background 0.15s; }
+  tbody tr:hover { background: rgba(0,200,255,0.04); }
+  tbody tr.completed-row { background: rgba(0,229,122,0.03); }
+  tbody tr.selected-row { background: rgba(0,200,255,0.07) !important; }
+  tbody tr.selected-row td { border-bottom-color: rgba(0,200,255,0.15); }
+  td { padding: 10px 14px; vertical-align: middle; white-space: nowrap; }
+  .td-id { font-family: var(--mono); font-size: 11px; color: var(--accent); }
+  .td-pkg { font-family: var(--mono); font-size: 11px; color: var(--accent2); }
+  .td-lbs { font-family: var(--mono); font-size: 11px; color: var(--warning); }
+  .col-select { width: 40px; text-align: center; }
+  .row-check { width: 16px; height: 16px; cursor: pointer; accent-color: var(--accent); }
+
+  .check-wrap { display: flex; align-items: center; justify-content: center; }
+  .custom-check { width: 22px; height: 22px; border: 2px solid var(--border); background: var(--bg); cursor: pointer; display: grid; place-items: center; transition: all 0.15s; flex-shrink: 0; }
+  .custom-check:hover { border-color: var(--accent); background: rgba(0,200,255,0.08); }
+  .custom-check.checked { background: var(--success); border-color: var(--success); }
+  .custom-check.checked svg { display: block; }
+  .custom-check svg { display: none; width: 13px; height: 13px; color: #000; }
+
+  .date-input { background: transparent; border: 1px solid transparent; color: var(--text); font-family: var(--mono); font-size: 11px; padding: 4px 8px; outline: none; width: 130px; transition: border-color 0.15s; cursor: pointer; }
+  .date-input:hover { border-color: var(--border); background: var(--surface2); }
+  .date-input:focus { border-color: var(--accent); background: var(--surface2); }
+  .date-input::-webkit-calendar-picker-indicator { filter: invert(0.6); cursor: pointer; }
+
+  .status-badge { display: inline-flex; align-items: center; gap: 6px; font-family: var(--mono); font-size: 10px; letter-spacing: 1px; padding: 3px 10px; text-transform: uppercase; }
+  .status-dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
+  .status-pending { color: var(--text-dim); } .status-pending .status-dot { background: var(--text-dim); }
+  .status-released { color: var(--warning); } .status-released .status-dot { background: var(--warning); box-shadow: 0 0 6px var(--warning); }
+  .status-prefab { color: var(--accent); } .status-prefab .status-dot { background: var(--accent); box-shadow: 0 0 6px var(--accent); }
+  .status-shipped { color: var(--accent2); } .status-shipped .status-dot { background: var(--accent2); box-shadow: 0 0 6px var(--accent2); }
+  .status-installed { color: var(--success); } .status-installed .status-dot { background: var(--success); box-shadow: 0 0 6px var(--success); }
+
+  .empty-state { padding: 80px 20px; text-align: center; }
+  .empty-icon { width: 64px; height: 64px; border: 2px dashed var(--border); display: grid; place-items: center; margin: 0 auto 20px; }
+  .empty-icon svg { width: 28px; height: 28px; color: var(--text-dim); }
+  .empty-title { font-family: var(--sans); font-size: 18px; font-weight: 700; letter-spacing: 3px; text-transform: uppercase; color: var(--text-dim); margin-bottom: 8px; }
+  .empty-sub { font-family: var(--mono); font-size: 11px; color: var(--text-dim); opacity: 0.6; }
+
+  /* MODALS */
+  .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.7); backdrop-filter: blur(4px); z-index: 100; display: none; place-items: center; }
+  .modal-overlay.open { display: grid; }
+  .modal { background: var(--surface); border: 1px solid var(--border); border-top: 2px solid var(--accent); width: 500px; max-width: 95vw; padding: 32px; position: relative; }
+  .modal-title { font-family: var(--sans); font-size: 18px; font-weight: 900; letter-spacing: 3px; text-transform: uppercase; color: var(--text-bright); margin-bottom: 24px; }
+  .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 24px; }
+  .form-field { display: flex; flex-direction: column; gap: 6px; }
+  .form-field.full { grid-column: 1 / -1; }
+  .form-label { font-family: var(--mono); font-size: 10px; letter-spacing: 2px; color: var(--text-dim); text-transform: uppercase; }
+  .form-input { background: var(--surface2); border: 1px solid var(--border); color: var(--text-bright); font-family: var(--mono); font-size: 12px; padding: 9px 12px; outline: none; transition: border-color 0.15s; width: 100%; }
+  .form-input:focus { border-color: var(--accent); }
+  .modal-actions { display: flex; gap: 10px; justify-content: flex-end; }
+  .close-modal { position: absolute; top: 16px; right: 16px; background: none; border: none; color: var(--text-dim); cursor: pointer; font-size: 20px; line-height: 1; transition: color 0.15s; }
+  .close-modal:hover { color: var(--text-bright); }
+
+  /* BREAKDOWN */
+  .breakdown-section { margin-top: 28px; display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .breakdown-card { background: var(--surface); border: 1px solid var(--border); padding: 20px; }
+  .breakdown-title { font-family: var(--sans); font-size: 12px; font-weight: 700; letter-spacing: 3px; text-transform: uppercase; color: var(--text-bright); margin-bottom: 16px; display: flex; align-items: center; gap: 10px; }
+  .breakdown-title::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+  .breakdown-row { display: grid; grid-template-columns: 1fr auto 100px; gap: 10px; align-items: center; margin-bottom: 10px; }
+  .breakdown-key { font-family: var(--mono); font-size: 11px; color: var(--text); overflow: hidden; text-overflow: ellipsis; }
+  .breakdown-count { font-family: var(--mono); font-size: 11px; color: var(--text-dim); white-space: nowrap; }
+  .mini-bar { height: 4px; background: var(--border); position: relative; }
+  .mini-fill { height: 100%; transition: width 0.4s; }
+
+  /* TOAST */
+  .toast { position: fixed; bottom: 24px; right: 24px; background: var(--surface); border: 1px solid var(--accent); border-left: 4px solid var(--accent); padding: 14px 20px; font-family: var(--mono); font-size: 12px; color: var(--text); z-index: 200; transform: translateX(120%); transition: transform 0.3s ease; max-width: 320px; }
+  .toast.show { transform: translateX(0); }
+  .toast.error { border-color: var(--danger); border-left-color: var(--danger); }
+
+  /* LOADING OVERLAY */
+  .loading-overlay { position: fixed; inset: 0; background: rgba(10,14,20,0.85); z-index: 300; display: grid; place-items: center; }
+  .loading-overlay.hidden { display: none; }
+  .loading-box { text-align: center; }
+  .loading-spinner { width: 40px; height: 40px; border: 2px solid var(--border); border-top-color: var(--accent); border-radius: 50%; animation: spin 0.8s linear infinite; margin: 0 auto 16px; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .loading-text { font-family: var(--mono); font-size: 11px; letter-spacing: 3px; color: var(--accent); text-transform: uppercase; }
+
+  ::-webkit-scrollbar { width: 6px; height: 6px; }
+  ::-webkit-scrollbar-track { background: var(--bg); }
+  ::-webkit-scrollbar-thumb { background: var(--border); }
+  ::-webkit-scrollbar-thumb:hover { background: var(--accent); }
+
+  @media (max-width: 900px) {
+    .stats-bar { grid-template-columns: repeat(3, 1fr); }
+    .breakdown-section { grid-template-columns: 1fr; }
+    .progress-stages { grid-template-columns: repeat(2, 1fr); }
+  }
+</style>
+</head>
+<body>
+
+<!-- LOADING -->
+<div class="loading-overlay" id="loadingOverlay">
+  <div class="loading-box">
+    <div class="loading-spinner"></div>
+    <div class="loading-text" id="loadingText">Connecting to database...</div>
+  </div>
+</div>
+
+<header>
+  <div class="logo-block">
+    <div class="logo-icon">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"/>
+        <polyline points="9 22 9 12 15 12 15 22"/>
+      </svg>
+    </div>
+    <div class="logo-text">
+      <h1>Prefab Tracker</h1>
+      <p>REVIT 2022 · ASSEMBLY MANAGEMENT SYSTEM</p>
+    </div>
+  </div>
+  <div class="header-actions">
+    <div class="sync-status" id="syncStatus">
+      <div class="sync-dot"></div>
+      <span id="syncLabel">Connecting...</span>
+    </div>
+    <label class="csv-input-label">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+      Import CSV
+      <input type="file" id="csvFile" accept=".csv,.txt">
+    </label>
+    <button class="btn btn-secondary" onclick="exportCSV()">Export CSV</button>
+    <button class="btn btn-secondary" style="color:var(--danger);border-color:var(--danger);" onclick="clearAll()">Clear All</button>
+    <button class="btn btn-primary" onclick="openModal()">+ Add Assembly</button>
+  </div>
+</header>
+
+<main>
+  <div class="stats-bar">
+    <div class="stat-card" style="--accent-color: var(--text-dim)">
+      <div class="label">Total Assemblies</div>
+      <div class="value" id="stat-total">0</div>
+      <div class="pct">ALL TRACKED</div>
+    </div>
+    <div class="stat-card" style="--accent-color: var(--warning)">
+      <div class="label">Released to Shop</div>
+      <div class="value" id="stat-released">0</div>
+      <div class="pct" id="pct-released">0%</div>
+    </div>
+    <div class="stat-card" style="--accent-color: var(--accent)">
+      <div class="label">Prefab Complete</div>
+      <div class="value" id="stat-prefab">0</div>
+      <div class="pct" id="pct-prefab">0%</div>
+    </div>
+    <div class="stat-card" style="--accent-color: var(--accent2)">
+      <div class="label">Shipped to Site</div>
+      <div class="value" id="stat-shipped">0</div>
+      <div class="pct" id="pct-shipped">0%</div>
+    </div>
+    <div class="stat-card" style="--accent-color: var(--success)">
+      <div class="label">Installed in Field</div>
+      <div class="value" id="stat-installed">0</div>
+      <div class="pct" id="pct-installed">0%</div>
+    </div>
+  </div>
+
+  <div class="progress-wrap">
+    <div class="progress-header">
+      <div class="progress-title">Prefab Overview</div>
+      <div style="font-family:var(--mono);font-size:10px;color:var(--text-dim);" id="filter-info">ALL ASSEMBLIES</div>
+    </div>
+    <div class="progress-stages">
+      <div class="stage-bar">
+        <div class="stage-label"><span>RELEASED</span><span id="bar-released-pct">0%</span></div>
+        <div class="bar-track"><div class="bar-fill" id="bar-released" style="width:0%;background:var(--warning)"></div></div>
+      </div>
+      <div class="stage-bar">
+        <div class="stage-label"><span>PREFAB DONE</span><span id="bar-prefab-pct">0%</span></div>
+        <div class="bar-track"><div class="bar-fill" id="bar-prefab" style="width:0%;background:var(--accent)"></div></div>
+      </div>
+      <div class="stage-bar">
+        <div class="stage-label"><span>SHIPPED</span><span id="bar-shipped-pct">0%</span></div>
+        <div class="bar-track"><div class="bar-fill" id="bar-shipped" style="width:0%;background:var(--accent2)"></div></div>
+      </div>
+      <div class="stage-bar">
+        <div class="stage-label"><span>INSTALLED</span><span id="bar-installed-pct">0%</span></div>
+        <div class="bar-track"><div class="bar-fill" id="bar-installed" style="width:0%;background:var(--success)"></div></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="filter-bar">
+    <div class="filter-group">
+      <span class="filter-label">Search</span>
+      <input type="text" class="search-input" id="searchInput" placeholder="Spool ID, Package, LBS..." oninput="applyFilters()">
+    </div>
+    <div class="filter-divider"></div>
+    <div class="filter-group">
+      <span class="filter-label">Package</span>
+      <select id="filterPackage" onchange="applyFilters()"><option value="">All</option></select>
+    </div>
+    <div class="filter-group">
+      <span class="filter-label">LBS Level</span>
+      <select id="filterLBS" onchange="applyFilters()"><option value="">All</option></select>
+    </div>
+    <div class="filter-group">
+      <span class="filter-label">Status</span>
+      <select id="filterStatus" onchange="applyFilters()">
+        <option value="">All</option>
+        <option value="pending">Pending</option>
+        <option value="released">Released</option>
+        <option value="prefab">Prefab Complete</option>
+        <option value="shipped">Shipped</option>
+        <option value="installed">Installed</option>
+      </select>
+    </div>
+    <div class="filter-divider"></div>
+    <button class="btn btn-secondary" style="padding:7px 14px;font-size:11px;" onclick="clearFilters()">Clear</button>
+    <div style="margin-left:auto;font-family:var(--mono);font-size:11px;color:var(--text-dim);">
+      Showing <span id="showing-count">0</span> of <span id="total-count">0</span>
+    </div>
+  </div>
+
+  <div class="bulk-toolbar" id="bulkToolbar">
+    <span class="bulk-count"><span id="bulkCount">0</span> selected</span>
+    <div class="bulk-divider"></div>
+    <button class="btn btn-primary" style="padding:6px 14px;font-size:11px;" onclick="openBulkModal()">✎ Edit Selected</button>
+    <button class="btn btn-secondary" style="padding:6px 14px;font-size:11px;" onclick="bulkDelete()">✕ Delete Selected</button>
+    <span style="font-family:var(--mono);font-size:10px;color:var(--text-dim);margin-left:8px;">SHIFT+CLICK range · CTRL+CLICK multi</span>
+    <button class="btn btn-secondary" style="padding:6px 14px;font-size:11px;margin-left:auto;" onclick="clearSelection()">Deselect All</button>
+  </div>
+
+  <div class="table-wrap" id="tableWrap">
+    <div class="empty-state" id="emptyState">
+      <div class="empty-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+          <rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/>
+        </svg>
+      </div>
+      <div class="empty-title">No Assemblies Loaded</div>
+      <div class="empty-sub">IMPORT A CSV FROM REVIT OR ADD ASSEMBLIES MANUALLY</div>
+    </div>
+    <table id="mainTable" style="display:none;">
+      <thead>
+        <tr>
+          <th class="col-select"><input type="checkbox" class="row-check" id="selectAll" onchange="toggleSelectAll(this.checked)" title="Select all"></th>
+          <th onclick="sortTable('spool_id')">eV_SpoolId <span class="sort-icon">▴</span></th>
+          <th onclick="sortTable('package_id')">eV_PackageId <span class="sort-icon">▴</span></th>
+          <th onclick="sortTable('lbs_id')">eV_LBS_Id <span class="sort-icon">▴</span></th>
+          <th onclick="sortTable('release_date')">Release Date <span class="sort-icon">▴</span></th>
+          <th style="text-align:center">Prefab Done</th>
+          <th onclick="sortTable('ship_date')">Ship Date <span class="sort-icon">▴</span></th>
+          <th style="text-align:center">Installed</th>
+          <th>Status</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody id="tableBody"></tbody>
+    </table>
+  </div>
+
+  <div class="breakdown-section">
+    <div class="breakdown-card">
+      <div class="breakdown-title">By Package ID</div>
+      <div id="breakdown-package"></div>
+    </div>
+    <div class="breakdown-card">
+      <div class="breakdown-title">By LBS Level</div>
+      <div id="breakdown-lbs"></div>
+    </div>
+  </div>
+</main>
+
+<!-- ADD MODAL -->
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal">
+    <button class="close-modal" onclick="closeModal()">×</button>
+    <div class="modal-title">Add Assembly</div>
+    <div class="form-grid">
+      <div class="form-field">
+        <label class="form-label">eV_SpoolId *</label>
+        <input class="form-input" id="f_spoolId" placeholder="SP-001">
+      </div>
+      <div class="form-field">
+        <label class="form-label">eV_PackageId</label>
+        <input class="form-input" id="f_packageId" placeholder="PKG-A">
+      </div>
+      <div class="form-field">
+        <label class="form-label">eV_LBS_Id *</label>
+        <input class="form-input" id="f_lbsId" placeholder="LEVEL 7 AREA 7">
+      </div>
+      <div class="form-field">
+        <label class="form-label">Release Date</label>
+        <input class="form-input" type="date" id="f_releaseDate">
+      </div>
+      <div class="form-field">
+        <label class="form-label">Ship Date</label>
+        <input class="form-input" type="date" id="f_shipDate">
+      </div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-secondary" onclick="closeModal()">Cancel</button>
+      <button class="btn btn-primary" id="addBtn" onclick="addRow()">Add Assembly</button>
+    </div>
+  </div>
+</div>
+
+<!-- BULK EDIT MODAL -->
+<div class="modal-overlay" id="bulkModalOverlay">
+  <div class="modal" style="width:480px;">
+    <button class="close-modal" onclick="closeBulkModal()">×</button>
+    <div class="modal-title">Bulk Edit <span id="bulkModalCount" style="color:var(--accent);font-size:14px;"></span></div>
+    <div style="font-family:var(--mono);font-size:10px;color:var(--text-dim);margin-bottom:20px;letter-spacing:1px;">LEAVE FIELDS BLANK TO KEEP EXISTING VALUES</div>
+    <div class="form-grid">
+      <div class="form-field">
+        <label class="form-label">Release Date</label>
+        <input class="form-input" type="date" id="bulk_releaseDate">
+      </div>
+      <div class="form-field">
+        <label class="form-label">Ship Date</label>
+        <input class="form-input" type="date" id="bulk_shipDate">
+      </div>
+      <div class="form-field full">
+        <label class="form-label" style="margin-bottom:10px;">Prefab Done</label>
+        <div style="display:flex;gap:10px;flex-wrap:wrap;">
+          <label style="display:flex;align-items:center;gap:8px;font-family:var(--mono);font-size:11px;cursor:pointer;"><input type="radio" name="bulk_prefab" value="no-change" checked style="accent-color:var(--accent)"> No change</label>
+          <label style="display:flex;align-items:center;gap:8px;font-family:var(--mono);font-size:11px;cursor:pointer;"><input type="radio" name="bulk_prefab" value="true" style="accent-color:var(--success)"> ✓ Mark Done</label>
+          <label style="display:flex;align-items:center;gap:8px;font-family:var(--mono);font-size:11px;cursor:pointer;"><input type="radio" name="bulk_prefab" value="false" style="accent-color:var(--danger)"> ✕ Mark Undone</label>
+        </div>
+      </div>
+      <div class="form-field full">
+        <label class="form-label" style="margin-bottom:10px;">Installed in Field</label>
+        <div style="display:flex;gap:10px;flex-wrap:wrap;">
+          <label style="display:flex;align-items:center;gap:8px;font-family:var(--mono);font-size:11px;cursor:pointer;"><input type="radio" name="bulk_installed" value="no-change" checked style="accent-color:var(--accent)"> No change</label>
+          <label style="display:flex;align-items:center;gap:8px;font-family:var(--mono);font-size:11px;cursor:pointer;"><input type="radio" name="bulk_installed" value="true" style="accent-color:var(--success)"> ✓ Mark Installed</label>
+          <label style="display:flex;align-items:center;gap:8px;font-family:var(--mono);font-size:11px;cursor:pointer;"><input type="radio" name="bulk_installed" value="false" style="accent-color:var(--danger)"> ✕ Mark Not Installed</label>
+        </div>
+      </div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-secondary" onclick="closeBulkModal()">Cancel</button>
+      <button class="btn btn-primary" id="bulkApplyBtn" onclick="applyBulkEdit()">Apply to Selected</button>
+    </div>
+  </div>
+</div>
+
+<!-- CSV MAPPING MODAL -->
+<div class="modal-overlay" id="mapModalOverlay">
+  <div class="modal" style="width:660px;max-width:96vw;">
+    <button class="close-modal" onclick="document.getElementById('mapModalOverlay').classList.remove('open')">×</button>
+    <div class="modal-title">Map CSV Columns</div>
+    <div id="mapModalBody"></div>
+    <div class="modal-actions">
+      <button class="btn btn-secondary" onclick="document.getElementById('mapModalOverlay').classList.remove('open')">Cancel</button>
+      <button class="btn btn-primary" onclick="confirmMapping()">Import Data</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+  // ─── SUPABASE ────────────────────────────────────────────────────
+  const SUPABASE_URL = 'https://vgpoytvlzvjozgrbribq.supabase.co';
+  const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZncG95dHZsenZqb3pncmJyaWJxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM0NDQwNDAsImV4cCI6MjA4OTAyMDA0MH0.Mbl8t11OeMULWlqHK1GnN9BDgFx87u_hogpMPrR-o4E';
+  const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+  // ─── STATE ───────────────────────────────────────────────────────
+  let assemblies = [];
+  let filteredIds = [];
+  let selectedIds = new Set();
+  let sortKey = '';
+  let sortAsc = true;
+  let lastClickedIndex = -1;
+  let lastSortedIds = [];
+  let realtimeChannel = null;
+
+  // ─── INIT ────────────────────────────────────────────────────────
+  async function init() {
+    setSync('connecting', 'Connecting...');
+    try {
+      await loadAll();
+      setSync('connected', 'Live · All users synced');
+      subscribeRealtime();
+    } catch(e) {
+      setSync('error', 'Connection failed');
+      showToast('Could not connect to database. Check your network.', true);
+    }
+    document.getElementById('loadingOverlay').classList.add('hidden');
+  }
+
+  async function loadAll() {
+    document.getElementById('loadingText').textContent = 'Loading assemblies...';
+    const { data, error } = await sb.from('assemblies').select('*').order('created_at', { ascending: true });
+    if (error) throw error;
+    assemblies = data.map(dbToLocal);
+    render();
+  }
+
+  // ─── REALTIME ────────────────────────────────────────────────────
+  function subscribeRealtime() {
+    realtimeChannel = sb.channel('assemblies-changes')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'assemblies' }, handleRealtimeEvent)
+      .subscribe((status) => {
+        if (status === 'SUBSCRIBED') setSync('connected', 'Live · All users synced');
+      });
+  }
+
+  function handleRealtimeEvent(payload) {
+    const { eventType, new: newRow, old: oldRow } = payload;
+    if (eventType === 'INSERT') {
+      // Only add if not already present (avoid echo from own insert)
+      if (!assemblies.find(a => a.id === newRow.id)) {
+        assemblies.push(dbToLocal(newRow));
+        render();
+        showToast('New assembly added by another user');
+      }
+    } else if (eventType === 'UPDATE') {
+      const idx = assemblies.findIndex(a => a.id === newRow.id);
+      if (idx >= 0) { assemblies[idx] = dbToLocal(newRow); render(); }
+    } else if (eventType === 'DELETE') {
+      assemblies = assemblies.filter(a => a.id !== oldRow.id);
+      selectedIds.delete(oldRow.id);
+      render();
+    }
+  }
+
+  // ─── DB HELPERS ──────────────────────────────────────────────────
+  function dbToLocal(row) {
+    return {
+      id: row.id,
+      spoolId: row.spool_id || '',
+      packageId: row.package_id || '',
+      lbsId: row.lbs_id || '',
+      releaseDate: row.release_date || '',
+      prefabDone: row.prefab_done || false,
+      shipDate: row.ship_date || '',
+      installed: row.installed || false,
+    };
+  }
+
+  function localToDb(a) {
+    return {
+      spool_id: a.spoolId,
+      package_id: a.packageId,
+      lbs_id: a.lbsId,
+      release_date: a.releaseDate || null,
+      prefab_done: a.prefabDone,
+      ship_date: a.shipDate || null,
+      installed: a.installed,
+    };
+  }
+
+  // ─── SYNC STATUS ─────────────────────────────────────────────────
+  function setSync(state, label) {
+    const el = document.getElementById('syncStatus');
+    el.className = 'sync-status ' + state;
+    document.getElementById('syncLabel').textContent = label;
+  }
+
+  // ─── RENDER ──────────────────────────────────────────────────────
+  function render() { applyFilters(); }
+
+  function applyFilters() {
+    lastClickedIndex = -1;
+    const search = document.getElementById('searchInput').value.toLowerCase();
+    const pkg    = document.getElementById('filterPackage').value;
+    const lbs    = document.getElementById('filterLBS').value;
+    const status = document.getElementById('filterStatus').value;
+
+    filteredIds = assemblies.filter(a => {
+      const matchSearch = !search || a.spoolId.toLowerCase().includes(search) || a.packageId.toLowerCase().includes(search) || a.lbsId.toLowerCase().includes(search);
+      const matchPkg    = !pkg    || a.packageId === pkg;
+      const matchLbs    = !lbs    || a.lbsId === lbs;
+      const matchStatus = !status || getStatus(a) === status;
+      return matchSearch && matchPkg && matchLbs && matchStatus;
+    });
+
+    populateFilters();
+    renderTable();
+    updateStats();
+    renderBreakdowns();
+  }
+
+  function getStatus(a) {
+    if (a.installed)   return 'installed';
+    if (a.shipDate)    return 'shipped';
+    if (a.prefabDone)  return 'prefab';
+    if (a.releaseDate) return 'released';
+    return 'pending';
+  }
+
+  function getStatusBadge(a) {
+    const map = { pending:['PENDING','status-pending'], released:['RELEASED','status-released'], prefab:['PREFAB DONE','status-prefab'], shipped:['SHIPPED','status-shipped'], installed:['INSTALLED','status-installed'] };
+    const [label, cls] = map[getStatus(a)];
+    return `<span class="status-badge ${cls}"><span class="status-dot"></span>${label}</span>`;
+  }
+
+  function renderTable() {
+    const tbody  = document.getElementById('tableBody');
+    const table  = document.getElementById('mainTable');
+    const empty  = document.getElementById('emptyState');
+
+    document.getElementById('showing-count').textContent = filteredIds.length;
+    document.getElementById('total-count').textContent   = assemblies.length;
+
+    if (assemblies.length === 0) { table.style.display = 'none'; empty.style.display = 'block'; updateSelectionUI(); return; }
+
+    table.style.display = 'table'; empty.style.display = 'none';
+
+    let sorted = [...filteredIds];
+    if (sortKey) {
+      sorted.sort((a,b) => {
+        let va = a[sortKey]||'', vb = b[sortKey]||'';
+        if (sortKey==='prefabDone'||sortKey==='installed') { va=a[sortKey]?1:0; vb=b[sortKey]?1:0; }
+        if (va<vb) return sortAsc?-1:1; if (va>vb) return sortAsc?1:-1; return 0;
+      });
+    }
+
+    lastSortedIds = sorted.map(a => a.id);
+
+    tbody.innerHTML = sorted.map(a => `
+      <tr id="row-${a.id}" class="${a.installed?'completed-row':''} ${selectedIds.has(a.id)?'selected-row':''}">
+        <td class="col-select" onclick="handleRowClick('${a.id}',event)" style="cursor:pointer;">
+          <input type="checkbox" class="row-check" onclick="event.stopPropagation();handleRowClick('${a.id}',event)" ${selectedIds.has(a.id)?'checked':''} readonly>
+        </td>
+        <td class="td-id">${a.spoolId}</td>
+        <td class="td-pkg">${a.packageId}</td>
+        <td class="td-lbs">${a.lbsId}</td>
+        <td><input type="date" class="date-input" value="${a.releaseDate}" onchange="updateField('${a.id}','releaseDate',this.value)"></td>
+        <td>
+          <div class="check-wrap">
+            <div class="custom-check ${a.prefabDone?'checked':''}" onclick="toggleBool('${a.id}','prefabDone')">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
+            </div>
+          </div>
+        </td>
+        <td><input type="date" class="date-input" value="${a.shipDate}" onchange="updateField('${a.id}','shipDate',this.value)"></td>
+        <td>
+          <div class="check-wrap">
+            <div class="custom-check ${a.installed?'checked':''}" onclick="toggleBool('${a.id}','installed')">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
+            </div>
+          </div>
+        </td>
+        <td>${getStatusBadge(a)}</td>
+        <td><button class="btn btn-danger" style="padding:4px 10px;font-size:10px;clip-path:none;" onclick="deleteRow('${a.id}')">✕</button></td>
+      </tr>`).join('');
+
+    updateSelectionUI();
+  }
+
+  function updateStats() {
+    const vis  = filteredIds;
+    const vLen = vis.length || 1;
+    const released  = vis.filter(a => a.releaseDate).length;
+    const prefab    = vis.filter(a => a.prefabDone).length;
+    const shipped   = vis.filter(a => a.shipDate).length;
+    const installed = vis.filter(a => a.installed).length;
+
+    document.getElementById('stat-total').textContent    = assemblies.length;
+    document.getElementById('stat-released').textContent = released;
+    document.getElementById('stat-prefab').textContent   = prefab;
+    document.getElementById('stat-shipped').textContent  = shipped;
+    document.getElementById('stat-installed').textContent= installed;
+
+    const pct = v => Math.round(v/vLen*100)+'%';
+    document.getElementById('pct-released').textContent = pct(released);
+    document.getElementById('pct-prefab').textContent   = pct(prefab);
+    document.getElementById('pct-shipped').textContent  = pct(shipped);
+    document.getElementById('pct-installed').textContent= pct(installed);
+
+    ['released','prefab','shipped','installed'].forEach(k => {
+      const val = {released,prefab,shipped,installed}[k];
+      const p   = Math.round(val/vLen*100);
+      document.getElementById(`bar-${k}`).style.width     = p+'%';
+      document.getElementById(`bar-${k}-pct`).textContent = p+'%';
+    });
+
+    const pkg = document.getElementById('filterPackage').value;
+    const lbs = document.getElementById('filterLBS').value;
+    const st  = document.getElementById('filterStatus').value;
+    let info = 'ALL ASSEMBLIES';
+    if (pkg||lbs||st) { const parts=[]; if(pkg) parts.push(`PKG: ${pkg}`); if(lbs) parts.push(`LBS: ${lbs}`); if(st) parts.push(`STATUS: ${st.toUpperCase()}`); info=parts.join(' · '); }
+    document.getElementById('filter-info').textContent = info;
+  }
+
+  function renderBreakdowns() {
+    renderBreakdown('breakdown-package','packageId','#00c8ff');
+    renderBreakdown('breakdown-lbs','lbsId','#00e57a');
+  }
+
+  function renderBreakdown(cid, key, color) {
+    const c = document.getElementById(cid);
+    const groups = {};
+    filteredIds.forEach(a => {
+      const k = a[key]||'N/A';
+      if (!groups[k]) groups[k] = {total:0,installed:0};
+      groups[k].total++;
+      if (a.installed) groups[k].installed++;
+    });
+    const sorted = Object.entries(groups).sort((a,b)=>b[1].total-a[1].total);
+    if (!sorted.length) { c.innerHTML='<div style="font-family:var(--mono);font-size:11px;color:var(--text-dim);padding:10px 0;">No data</div>'; return; }
+    const maxTotal = Math.max(...sorted.map(s=>s[1].total));
+    c.innerHTML = sorted.map(([k,v]) => {
+      const pct = Math.round(v.installed/v.total*100);
+      return `<div class="breakdown-row">
+        <div class="breakdown-key">${k}</div>
+        <div class="breakdown-count">${v.installed}/${v.total} · ${pct}%</div>
+        <div class="mini-bar">
+          <div class="mini-fill" style="width:${Math.round(v.total/maxTotal*100)}%;background:${color};opacity:0.3;position:absolute;top:0;left:0;height:100%;"></div>
+          <div class="mini-fill" style="width:${Math.round(v.installed/maxTotal*100)}%;background:${color};"></div>
+        </div></div>`;
+    }).join('');
+  }
+
+  function populateFilters() {
+    const pkgs = [...new Set(assemblies.map(a=>a.packageId))].sort();
+    const lbss = [...new Set(assemblies.map(a=>a.lbsId))].sort();
+    const curPkg = document.getElementById('filterPackage').value;
+    const curLbs = document.getElementById('filterLBS').value;
+    document.getElementById('filterPackage').innerHTML = '<option value="">All</option>'+pkgs.map(p=>`<option value="${p}" ${p===curPkg?'selected':''}>${p}</option>`).join('');
+    document.getElementById('filterLBS').innerHTML     = '<option value="">All</option>'+lbss.map(l=>`<option value="${l}" ${l===curLbs?'selected':''}>${l}</option>`).join('');
+  }
+
+  // ─── DB MUTATIONS ────────────────────────────────────────────────
+  async function updateField(id, field, value) {
+    const a = assemblies.find(x=>x.id===id);
+    if (!a) return;
+    a[field] = value;
+    renderTable(); updateStats(); renderBreakdowns();
+    setSync('syncing','Saving...');
+    const { error } = await sb.from('assemblies').update(localToDb(a)).eq('id', id);
+    if (error) { showToast('Save failed: '+error.message, true); setSync('error','Save failed'); }
+    else setSync('connected','Live · All users synced');
+  }
+
+  async function toggleBool(id, field) {
+    const a = assemblies.find(x=>x.id===id);
+    if (!a) return;
+    a[field] = !a[field];
+    renderTable(); updateStats(); renderBreakdowns();
+    setSync('syncing','Saving...');
+    const { error } = await sb.from('assemblies').update(localToDb(a)).eq('id', id);
+    if (error) { showToast('Save failed: '+error.message, true); setSync('error','Save failed'); }
+    else setSync('connected','Live · All users synced');
+  }
+
+  async function deleteRow(id) {
+    assemblies = assemblies.filter(x=>x.id!==id);
+    selectedIds.delete(id);
+    render();
+    setSync('syncing','Saving...');
+    const { error } = await sb.from('assemblies').delete().eq('id', id);
+    if (error) { showToast('Delete failed: '+error.message, true); setSync('error','Delete failed'); await loadAll(); }
+    else { showToast('Assembly removed'); setSync('connected','Live · All users synced'); }
+  }
+
+  // ─── SELECTION ───────────────────────────────────────────────────
+  function handleRowClick(id, event) {
+    const idx = lastSortedIds.indexOf(id);
+    if (event.shiftKey && lastClickedIndex !== -1) {
+      const lo = Math.min(lastClickedIndex, idx), hi = Math.max(lastClickedIndex, idx);
+      for (let i=lo; i<=hi; i++) selectedIds.add(lastSortedIds[i]);
+    } else if (event.ctrlKey || event.metaKey) {
+      if (selectedIds.has(id)) selectedIds.delete(id); else selectedIds.add(id);
+      lastClickedIndex = idx;
+    } else {
+      if (selectedIds.has(id)) selectedIds.delete(id); else selectedIds.add(id);
+      lastClickedIndex = idx;
+    }
+    updateSelectionUI(); renderTable();
+  }
+
+  function toggleSelectAll(checked) {
+    filteredIds.forEach(a => { if(checked) selectedIds.add(a.id); else selectedIds.delete(a.id); });
+    lastClickedIndex = -1; updateSelectionUI(); renderTable();
+  }
+
+  function clearSelection() { selectedIds.clear(); lastClickedIndex=-1; updateSelectionUI(); renderTable(); }
+
+  function updateSelectionUI() {
+    const count = selectedIds.size;
+    document.getElementById('bulkCount').textContent = count;
+    document.getElementById('bulkToolbar').classList.toggle('visible', count>0);
+    const sa = document.getElementById('selectAll');
+    if (sa) {
+      const visSelected = filteredIds.filter(a=>selectedIds.has(a.id)).length;
+      sa.checked       = filteredIds.length>0 && visSelected===filteredIds.length;
+      sa.indeterminate = visSelected>0 && visSelected<filteredIds.length;
+    }
+  }
+
+  // ─── ADD ROW ─────────────────────────────────────────────────────
+  function openModal()  { document.getElementById('modalOverlay').classList.add('open'); document.getElementById('f_spoolId').focus(); }
+  function closeModal() {
+    document.getElementById('modalOverlay').classList.remove('open');
+    ['f_spoolId','f_packageId','f_lbsId','f_releaseDate','f_shipDate'].forEach(id=>document.getElementById(id).value='');
+  }
+
+  async function addRow() {
+    const spoolId   = document.getElementById('f_spoolId').value.trim();
+    const packageId = document.getElementById('f_packageId').value.trim();
+    const lbsId     = document.getElementById('f_lbsId').value.trim();
+    if (!spoolId || !lbsId) { showToast('SpoolId and LBS_Id are required'); return; }
+
+    const btn = document.getElementById('addBtn');
+    btn.disabled = true; btn.textContent = 'Saving...';
+
+    const newRow = { spool_id:spoolId, package_id:packageId||null, lbs_id:lbsId, release_date:document.getElementById('f_releaseDate').value||null, prefab_done:false, ship_date:document.getElementById('f_shipDate').value||null, installed:false };
+    const { data, error } = await sb.from('assemblies').insert(newRow).select().single();
+
+    btn.disabled = false; btn.textContent = 'Add Assembly';
+
+    if (error) { showToast('Add failed: '+error.message, true); return; }
+    assemblies.push(dbToLocal(data));
+    closeModal(); render();
+    showToast(`Assembly ${spoolId} added`);
+  }
+
+  // ─── BULK EDIT ────────────────────────────────────────────────────
+  function openBulkModal() {
+    if (!selectedIds.size) return;
+    document.getElementById('bulkModalCount').textContent = `— ${selectedIds.size} assemblies`;
+    document.getElementById('bulk_releaseDate').value = '';
+    document.getElementById('bulk_shipDate').value    = '';
+    document.querySelectorAll('input[name="bulk_prefab"]')[0].checked    = true;
+    document.querySelectorAll('input[name="bulk_installed"]')[0].checked = true;
+    document.getElementById('bulkModalOverlay').classList.add('open');
+  }
+  function closeBulkModal() { document.getElementById('bulkModalOverlay').classList.remove('open'); }
+
+  async function applyBulkEdit() {
+    const releaseDate = document.getElementById('bulk_releaseDate').value;
+    const shipDate    = document.getElementById('bulk_shipDate').value;
+    const prefabVal   = document.querySelector('input[name="bulk_prefab"]:checked').value;
+    const installVal  = document.querySelector('input[name="bulk_installed"]:checked').value;
+
+    const btn = document.getElementById('bulkApplyBtn');
+    btn.disabled = true; btn.textContent = 'Saving...';
+
+    const ids = [...selectedIds];
+    const updates = [];
+
+    assemblies.forEach(a => {
+      if (!selectedIds.has(a.id)) return;
+      if (releaseDate)              a.releaseDate = releaseDate;
+      if (shipDate)                 a.shipDate    = shipDate;
+      if (prefabVal  !== 'no-change') a.prefabDone = prefabVal  === 'true';
+      if (installVal !== 'no-change') a.installed  = installVal === 'true';
+      updates.push(localToDb(a));
+    });
+
+    // Upsert all changed rows in one call
+    const { error } = await sb.from('assemblies').upsert(
+      ids.map((id,i) => ({ id, ...updates[i] }))
+    );
+
+    btn.disabled = false; btn.textContent = 'Apply to Selected';
+
+    if (error) { showToast('Bulk save failed: '+error.message, true); return; }
+    closeBulkModal(); render();
+    showToast(`✓ Updated ${ids.length} assemblies`);
+  }
+
+  async function bulkDelete() {
+    if (!selectedIds.size) return;
+    if (!confirm(`Delete ${selectedIds.size} selected assemblies? This cannot be undone.`)) return;
+    const ids = [...selectedIds];
+    assemblies = assemblies.filter(a => !selectedIds.has(a.id));
+    selectedIds.clear(); render();
+    const { error } = await sb.from('assemblies').delete().in('id', ids);
+    if (error) { showToast('Delete failed: '+error.message, true); await loadAll(); }
+    else showToast(`Deleted ${ids.length} assemblies`);
+  }
+
+  async function clearAll() {
+    if (!assemblies.length) { showToast('Nothing to clear'); return; }
+    if (!confirm(`Delete ALL ${assemblies.length} assemblies from the database? This cannot be undone.`)) return;
+    const ids = assemblies.map(a=>a.id);
+    assemblies = []; selectedIds.clear(); render();
+    const { error } = await sb.from('assemblies').delete().in('id', ids);
+    if (error) { showToast('Clear failed: '+error.message, true); await loadAll(); }
+    else showToast('All assemblies cleared');
+  }
+
+  // ─── CSV IMPORT ──────────────────────────────────────────────────
+  let csvParsedHeaders = [], csvParsedRows = [];
+
+  function parseCSVLine(line, delim) {
+    const result=[]; let cur='', inQuote=false;
+    for (let i=0;i<line.length;i++) {
+      const ch=line[i];
+      if (ch==='"') { inQuote=!inQuote; continue; }
+      if (!inQuote&&ch===delim) { result.push(cur.trim()); cur=''; continue; }
+      cur+=ch;
+    }
+    result.push(cur.trim()); return result;
+  }
+
+  function detectDelimiter(line) {
+    const c={',': (line.match(/,/g)||[]).length, '\t': (line.match(/\t/g)||[]).length, ';': (line.match(/;/g)||[]).length};
+    return Object.entries(c).sort((a,b)=>b[1]-a[1])[0][0];
+  }
+
+  function autoMapIndex(headers, patterns) {
+    const norm = headers.map(h=>h.toLowerCase().replace(/[\s_\-\.]/g,''));
+    for (const p of patterns) { const i=norm.findIndex(h=>h.includes(p)); if(i>=0) return i; }
+    return -1;
+  }
+
+  document.getElementById('csvFile').addEventListener('change', function(e) {
+    const file = e.target.files[0]; if (!file) return;
+    const reader = new FileReader();
+    reader.onload = function(ev) {
+      let raw = ev.target.result.replace(/^\uFEFF/,'').replace(/\r\n/g,'\n').replace(/\r/g,'\n');
+      let lines = raw.split('\n');
+      const nonBlank = lines.find(l=>l.replace(/,/g,'').trim());
+      const delim = detectDelimiter(nonBlank||lines[0]);
+
+      let headerLineIdx = -1;
+      for (let i=0;i<Math.min(8,lines.length);i++) {
+        const cols = parseCSVLine(lines[i],delim).map(c=>c.replace(/^\uFEFF/,'').toLowerCase().replace(/[\s_]/g,''));
+        if (cols.some(c=>c.includes('spoolid')||c.includes('packageid')||c.includes('lbsid'))) { headerLineIdx=i; break; }
+      }
+      if (headerLineIdx===-1) headerLineIdx=lines.findIndex(l=>l.trim()&&l.replace(/,/g,'').trim());
+      if (headerLineIdx===-1) { showToast('Could not detect headers in CSV',true); return; }
+
+      csvParsedHeaders = parseCSVLine(lines[headerLineIdx],delim).map(h=>h.replace(/^"|"$/g,'').replace(/^\uFEFF/,'').trim());
+      csvParsedRows = [];
+      for (let i=headerLineIdx+1;i<lines.length;i++) {
+        const line=lines[i];
+        if (!line.trim()||!line.replace(/,/g,'').trim()) continue;
+        const cols=parseCSVLine(line,delim).map(c=>c.replace(/^"|"$/g,'').trim());
+        if (cols.every(c=>!c)) continue;
+        csvParsedRows.push(cols);
+      }
+
+      const autoMap = {
+        spoolId:     autoMapIndex(csvParsedHeaders,['evspoolid','spoolid','spool']),
+        packageId:   autoMapIndex(csvParsedHeaders,['evpackageid','packageid','package']),
+        lbsId:       autoMapIndex(csvParsedHeaders,['evlbsid','lbsid','lbs']),
+        releaseDate: autoMapIndex(csvParsedHeaders,['releasedate','release','reldate']),
+        prefabDone:  autoMapIndex(csvParsedHeaders,['prefabdone','prefabcomplete','prefab']),
+        shipDate:    autoMapIndex(csvParsedHeaders,['shipdate','shipped','shiptosite']),
+        installed:   autoMapIndex(csvParsedHeaders,['installed','installedinfield','install']),
+      };
+      openMappingModal(autoMap, delim);
+      e.target.value='';
+    };
+    reader.readAsText(file);
+  });
+
+  function openMappingModal(autoMap, delim) {
+    const fields = [
+      {key:'spoolId',label:'eV_SpoolId',required:true},{key:'packageId',label:'eV_PackageId',required:false},
+      {key:'lbsId',label:'eV_LBS_Id',required:true},{key:'releaseDate',label:'Release Date',required:false},
+      {key:'prefabDone',label:'Prefab Done',required:false},{key:'shipDate',label:'Ship Date',required:false},
+      {key:'installed',label:'Installed',required:false},
+    ];
+    const optHtml = ['<option value="-1">— skip —</option>',...csvParsedHeaders.map((h,i)=>`<option value="${i}">${h}</option>`)].join('');
+    const rowsHtml = fields.map(f=>`
+      <div class="form-field">
+        <label class="form-label">${f.label}${f.required?' <span style="color:var(--accent2)">*</span>':''}</label>
+        <select class="form-input" id="map_${f.key}">${optHtml}</select>
+      </div>`).join('');
+    document.getElementById('mapModalBody').innerHTML = `
+      <div style="font-family:var(--mono);font-size:11px;color:var(--text-dim);margin-bottom:16px;">
+        Detected <strong style="color:var(--accent)">${csvParsedHeaders.length} columns</strong>,
+        <strong style="color:var(--accent)">${csvParsedRows.length} rows</strong>
+        · delimiter: <strong style="color:var(--accent2)">${delim==='\t'?'TAB':delim}</strong>
+        <br><br>Headers: <span style="color:var(--text)">${csvParsedHeaders.join(' | ')}</span>
+      </div>
+      <div class="form-grid">${rowsHtml}</div>`;
+    fields.forEach(f => { const sel=document.getElementById(`map_${f.key}`); if(sel&&autoMap[f.key]>=0) sel.value=autoMap[f.key]; });
+    document.getElementById('mapModalOverlay').classList.add('open');
+  }
+
+  async function confirmMapping() {
+    const getIdx = id => parseInt(document.getElementById(id)?.value??'-1');
+    const map = { spoolId:getIdx('map_spoolId'), packageId:getIdx('map_packageId'), lbsId:getIdx('map_lbsId'), releaseDate:getIdx('map_releaseDate'), prefabDone:getIdx('map_prefabDone'), shipDate:getIdx('map_shipDate'), installed:getIdx('map_installed') };
+    if (map.spoolId<0&&map.packageId<0&&map.lbsId<0) { showToast('Map at least one ID column'); return; }
+
+    const existingSpoolIds = new Set(assemblies.map(a=>a.spoolId.toLowerCase().trim()));
+    const toInsert=[]; let skipped=0;
+
+    csvParsedRows.forEach((cols,i) => {
+      const get = idx => idx>=0&&idx<cols.length?cols[idx]:'';
+      const spoolId=get(map.spoolId), packageId=get(map.packageId), lbsId=get(map.lbsId);
+      if (!spoolId&&!packageId&&!lbsId) return;
+      if (spoolId&&existingSpoolIds.has(spoolId.toLowerCase().trim())) { skipped++; return; }
+      toInsert.push({ spool_id:spoolId||`SP-${String(i+1).padStart(3,'0')}`, package_id:packageId||null, lbs_id:lbsId||null, release_date:get(map.releaseDate)||null, prefab_done:['true','1','yes','x'].includes(get(map.prefabDone).toLowerCase()), ship_date:get(map.shipDate)||null, installed:['true','1','yes','x'].includes(get(map.installed).toLowerCase()) });
+      existingSpoolIds.add(spoolId.toLowerCase().trim());
+    });
+
+    document.getElementById('mapModalOverlay').classList.remove('open');
+    if (!toInsert.length) { showToast(skipped?`All ${skipped} rows already exist`:'Nothing to import'); return; }
+
+    setSync('syncing', `Importing ${toInsert.length} rows...`);
+    document.getElementById('loadingText').textContent = `Importing ${toInsert.length} assemblies...`;
+    document.getElementById('loadingOverlay').classList.remove('hidden');
+
+    // Insert in batches of 200
+    const batchSize=200;
+    for (let i=0;i<toInsert.length;i+=batchSize) {
+      const batch=toInsert.slice(i,i+batchSize);
+      const { data, error } = await sb.from('assemblies').insert(batch).select();
+      if (error) { showToast('Import failed: '+error.message, true); setSync('error','Import failed'); break; }
+      data.forEach(row => assemblies.push(dbToLocal(row)));
+    }
+
+    document.getElementById('loadingOverlay').classList.add('hidden');
+    render(); setSync('connected','Live · All users synced');
+    const msg = skipped>0 ? `✓ Imported ${toInsert.length} · Skipped ${skipped} duplicates` : `✓ Imported ${toInsert.length} assemblies`;
+    showToast(msg);
+  }
+
+  // ─── EXPORT CSV ──────────────────────────────────────────────────
+  function exportCSV() {
+    if (!assemblies.length) { showToast('No data to export'); return; }
+    const headers=['eV_SpoolId','eV_PackageId','eV_LBS_Id','ReleaseDate','PrefabDone','ShipDate','Installed','Status'];
+    const rows=assemblies.map(a=>[a.spoolId,a.packageId,a.lbsId,a.releaseDate,a.prefabDone,a.shipDate,a.installed,getStatus(a)].join(','));
+    const csv=[headers.join(','),...rows].join('\n');
+    const blob=new Blob([csv],{type:'text/csv'});
+    const url=URL.createObjectURL(blob);
+    const link=document.createElement('a');
+    link.href=url; link.download=`prefab_tracker_${new Date().toISOString().slice(0,10)}.csv`; link.click();
+    URL.revokeObjectURL(url); showToast('CSV exported');
+  }
+
+  // ─── MISC ────────────────────────────────────────────────────────
+  function sortTable(key) { if(sortKey===key) sortAsc=!sortAsc; else{sortKey=key;sortAsc=true;} renderTable(); }
+
+  function clearFilters() {
+    document.getElementById('searchInput').value='';
+    document.getElementById('filterPackage').value='';
+    document.getElementById('filterLBS').value='';
+    document.getElementById('filterStatus').value='';
+    applyFilters();
+  }
+
+  let toastTimer;
+  function showToast(msg, isError=false) {
+    const t=document.getElementById('toast');
+    t.textContent=msg; t.className='toast show'+(isError?' error':'');
+    clearTimeout(toastTimer); toastTimer=setTimeout(()=>t.classList.remove('show'),3200);
+  }
+
+  document.addEventListener('keydown', e => {
+    if (e.key==='Escape') { closeModal(); closeBulkModal(); document.getElementById('mapModalOverlay').classList.remove('open'); }
+    if (e.key==='Enter'&&document.getElementById('modalOverlay').classList.contains('open')) addRow();
+  });
+
+  init();
+</script>
+</body>
+</html>
