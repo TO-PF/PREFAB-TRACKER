@@ -419,10 +419,10 @@
   <div class="bulk-toolbar" id="bulkToolbar">
     <span class="bulk-count"><span id="bulkCount">0</span> selected</span>
     <div class="bulk-divider"></div>
-    <button class="btn btn-primary edit-only" style="padding:6px 14px;font-size:11px;" onclick="openBulkModal()">✎ Edit Selected</button>
+    <button class="btn btn-primary edit-only" id="editSelectedBtn" style="padding:6px 18px;font-size:12px;" onclick="openBulkModal()">✎ Edit Selected</button>
     <button class="btn btn-secondary" style="padding:6px 14px;font-size:11px;" onclick="clearSelection()">Deselect All</button>
-    <span style="font-family:var(--mono);font-size:10px;color:var(--text-dim);margin-left:8px;">SHIFT+CLICK range · CTRL+CLICK multi</span>
-    <button class="btn btn-secondary edit-only" style="padding:6px 14px;font-size:11px;margin-left:auto;" onclick="bulkDelete()">✕ Delete Selected</button>
+    <span style="font-family:var(--mono);font-size:10px;color:var(--text-dim);margin-left:4px;">SHIFT+CLICK range · CTRL+CLICK multi-select</span>
+    <button class="btn btn-secondary edit-only" style="padding:6px 14px;font-size:11px;margin-left:auto;color:var(--danger);border-color:var(--danger);" onclick="bulkDelete()">✕ Delete Selected</button>
   </div>
 
   <div class="table-wrap" id="tableWrap">
@@ -945,42 +945,60 @@
   // ─── SELECTION ───────────────────────────────────────────────────
   function handleRowClick(id, event) {
     const idx = lastSortedIds.indexOf(id);
+
     if (event.shiftKey && lastClickedIndex !== -1) {
-      // Shift+click: select range and auto-open bulk edit if editor
+      // Shift+click: select the full range between anchor and here
       const lo = Math.min(lastClickedIndex, idx), hi = Math.max(lastClickedIndex, idx);
-      for (let i=lo; i<=hi; i++) selectedIds.add(lastSortedIds[i]);
-      updateSelectionUI(); renderTable();
-      // Auto-open bulk edit modal for quick editing of the range
-      if (isEditor && selectedIds.size > 1) {
-        setTimeout(() => openBulkModal(), 150);
-      }
+      for (let i = lo; i <= hi; i++) selectedIds.add(lastSortedIds[i]);
+      // anchor stays fixed for further shift-clicks
     } else if (event.ctrlKey || event.metaKey) {
+      // Ctrl/Cmd+click: toggle individual without losing selection
       if (selectedIds.has(id)) selectedIds.delete(id); else selectedIds.add(id);
       lastClickedIndex = idx;
-      updateSelectionUI(); renderTable();
     } else {
+      // Plain click: simple toggle
       if (selectedIds.has(id)) selectedIds.delete(id); else selectedIds.add(id);
       lastClickedIndex = idx;
-      updateSelectionUI(); renderTable();
     }
+
+    updateSelectionUI();
+    renderTable();
   }
 
   function toggleSelectAll(checked) {
-    filteredIds.forEach(a => { if(checked) selectedIds.add(a.id); else selectedIds.delete(a.id); });
-    lastClickedIndex = -1; updateSelectionUI(); renderTable();
+    filteredIds.forEach(a => { if (checked) selectedIds.add(a.id); else selectedIds.delete(a.id); });
+    lastClickedIndex = -1;
+    updateSelectionUI();
+    renderTable();
   }
 
-  function clearSelection() { selectedIds.clear(); lastClickedIndex=-1; updateSelectionUI(); renderTable(); }
+  function clearSelection() {
+    selectedIds.clear();
+    lastClickedIndex = -1;
+    updateSelectionUI();
+    renderTable();
+  }
 
   function updateSelectionUI() {
     const count = selectedIds.size;
     document.getElementById('bulkCount').textContent = count;
-    document.getElementById('bulkToolbar').classList.toggle('visible', count>0);
+    document.getElementById('bulkToolbar').classList.toggle('visible', count > 0);
+
+    // Highlight Edit Selected button when rows are selected
+    const editBtn = document.getElementById('editSelectedBtn');
+    if (editBtn) {
+      editBtn.style.background = count > 0 ? 'var(--accent)' : '';
+      editBtn.style.color      = count > 0 ? '#fff' : '';
+      editBtn.textContent = count > 1
+        ? `✎ Edit ${count} Selected`
+        : count === 1 ? '✎ Edit 1 Selected' : '✎ Edit Selected';
+    }
+
     const sa = document.getElementById('selectAll');
     if (sa) {
-      const visSelected = filteredIds.filter(a=>selectedIds.has(a.id)).length;
-      sa.checked       = filteredIds.length>0 && visSelected===filteredIds.length;
-      sa.indeterminate = visSelected>0 && visSelected<filteredIds.length;
+      const visSelected = filteredIds.filter(a => selectedIds.has(a.id)).length;
+      sa.checked       = filteredIds.length > 0 && visSelected === filteredIds.length;
+      sa.indeterminate = visSelected > 0 && visSelected < filteredIds.length;
     }
   }
 
