@@ -8,18 +8,18 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
   :root {
-    --bg: #0a0e14;
-    --surface: #111720;
-    --surface2: #182030;
-    --border: #1e2d42;
-    --accent: #00c8ff;
-    --accent2: #ff6b35;
-    --success: #00e57a;
-    --warning: #ffc107;
-    --danger: #ff4757;
-    --text: #c8d8e8;
+    --bg: #f0f4f8;
+    --surface: #ffffff;
+    --surface2: #e8edf3;
+    --border: #c5d0de;
+    --accent: #0a4a7c;
+    --accent2: #c94f1a;
+    --success: #0a7c4a;
+    --warning: #b07800;
+    --danger: #c0001a;
+    --text: #1a2a3a;
     --text-dim: #5a7a9a;
-    --text-bright: #eaf4ff;
+    --text-bright: #0a1a2a;
     --mono: 'Share Tech Mono', monospace;
     --sans: 'Barlow Condensed', sans-serif;
     --body: 'Barlow', sans-serif;
@@ -28,14 +28,14 @@
   body { background: var(--bg); color: var(--text); font-family: var(--body); min-height: 100vh; overflow-x: hidden; }
   body::before {
     content: ''; position: fixed; inset: 0;
-    background-image: linear-gradient(rgba(0,200,255,0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(0,200,255,0.03) 1px, transparent 1px);
+    background-image: linear-gradient(rgba(10,74,124,0.05) 1px, transparent 1px), linear-gradient(90deg, rgba(10,74,124,0.05) 1px, transparent 1px);
     background-size: 40px 40px; pointer-events: none; z-index: 0;
   }
 
   /* HEADER */
   header {
     position: relative; z-index: 10;
-    background: linear-gradient(180deg, #0d1520 0%, transparent 100%);
+    background: linear-gradient(180deg, #dce6f0 0%, transparent 100%);
     border-bottom: 1px solid var(--border);
     padding: 20px 32px; display: flex; align-items: center; justify-content: space-between; gap: 24px;
   }
@@ -118,7 +118,7 @@
   .filter-divider { width: 1px; height: 28px; background: var(--border); margin: 0 4px; }
 
   /* BULK TOOLBAR */
-  .bulk-toolbar { display: none; align-items: center; gap: 12px; background: #0d1e30; border: 1px solid var(--accent); border-bottom: none; padding: 10px 16px; flex-wrap: wrap; }
+  .bulk-toolbar { display: none; align-items: center; gap: 12px; background: #dce6f0; border: 1px solid var(--accent); border-bottom: none; padding: 10px 16px; flex-wrap: wrap; }
   .bulk-toolbar.visible { display: flex; }
   .bulk-count { font-family: var(--mono); font-size: 11px; color: var(--accent); white-space: nowrap; margin-right: 4px; }
   .bulk-divider { width: 1px; height: 22px; background: var(--border); }
@@ -127,7 +127,7 @@
   .table-wrap { background: var(--surface); border: 1px solid var(--border); overflow: auto; max-height: calc(100vh - 480px); min-height: 300px; }
   table { width: 100%; border-collapse: collapse; font-size: 13px; }
   thead { position: sticky; top: 0; z-index: 5; }
-  thead th { background: #0d1825; border-bottom: 2px solid var(--accent); padding: 12px 14px; text-align: left; font-family: var(--mono); font-size: 10px; letter-spacing: 2px; color: var(--accent); text-transform: uppercase; white-space: nowrap; cursor: pointer; user-select: none; transition: background 0.15s; }
+  thead th { background: #dce6f0; border-bottom: 2px solid var(--accent); padding: 12px 14px; text-align: left; font-family: var(--mono); font-size: 10px; letter-spacing: 2px; color: var(--accent); text-transform: uppercase; white-space: nowrap; cursor: pointer; user-select: none; transition: background 0.15s; }
   thead th:hover { background: rgba(0,200,255,0.08); }
   thead th .sort-icon { margin-left: 4px; opacity: 0.4; }
   tbody tr { border-bottom: 1px solid rgba(30,45,66,0.7); transition: background 0.15s; }
@@ -143,16 +143,16 @@
   .row-check { width: 16px; height: 16px; cursor: pointer; accent-color: var(--accent); }
 
   .check-wrap { display: flex; align-items: center; justify-content: center; }
-  .custom-check { width: 22px; height: 22px; border: 2px solid var(--border); background: var(--bg); cursor: pointer; display: grid; place-items: center; transition: all 0.15s; flex-shrink: 0; }
+  .custom-check { width: 22px; height: 22px; border: 2px solid var(--border); background: var(--surface2); cursor: pointer; display: grid; place-items: center; transition: all 0.15s; flex-shrink: 0; }
   .custom-check:hover { border-color: var(--accent); background: rgba(0,200,255,0.08); }
   .custom-check.checked { background: var(--success); border-color: var(--success); }
   .custom-check.checked svg { display: block; }
-  .custom-check svg { display: none; width: 13px; height: 13px; color: #000; }
+  .custom-check svg { display: none; width: 13px; height: 13px; color: #fff; }
 
   .date-input { background: transparent; border: 1px solid transparent; color: var(--text); font-family: var(--mono); font-size: 11px; padding: 4px 8px; outline: none; width: 130px; transition: border-color 0.15s; cursor: pointer; }
   .date-input:hover { border-color: var(--border); background: var(--surface2); }
   .date-input:focus { border-color: var(--accent); background: var(--surface2); }
-  .date-input::-webkit-calendar-picker-indicator { filter: invert(0.6); cursor: pointer; }
+  .date-input::-webkit-calendar-picker-indicator { filter: none; cursor: pointer; }
 
   .status-badge { display: inline-flex; align-items: center; gap: 6px; font-family: var(--mono); font-size: 10px; letter-spacing: 1px; padding: 3px 10px; text-transform: uppercase; }
   .status-dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
@@ -200,7 +200,7 @@
   .toast.error { border-color: var(--danger); border-left-color: var(--danger); }
 
   /* PIN MODAL */
-  .pin-overlay { position: fixed; inset: 0; background: rgba(5,9,14,0.97); z-index: 400; display: grid; place-items: center; }
+  .pin-overlay { position: fixed; inset: 0; background: rgba(240,244,248,0.97); z-index: 400; display: grid; place-items: center; }
   .pin-overlay.hidden { display: none; }
   .pin-box { text-align: center; width: 340px; }
   .pin-logo { width: 56px; height: 56px; border: 2px solid var(--accent); display: grid; place-items: center; margin: 0 auto 24px; clip-path: polygon(8px 0%, 100% 0%, 100% calc(100% - 8px), calc(100% - 8px) 100%, 0% 100%, 0% 8px); background: rgba(0,200,255,0.08); }
@@ -233,7 +233,7 @@
   body.readonly .date-input { pointer-events: none; }
 
   /* LOADING OVERLAY */
-  .loading-overlay { position: fixed; inset: 0; background: rgba(10,14,20,0.85); z-index: 300; display: grid; place-items: center; }
+  .loading-overlay { position: fixed; inset: 0; background: rgba(240,244,248,0.9); z-index: 300; display: grid; place-items: center; }
   .loading-overlay.hidden { display: none; }
   .loading-box { text-align: center; }
   .loading-spinner { width: 40px; height: 40px; border: 2px solid var(--border); border-top-color: var(--accent); border-radius: 50%; animation: spin 0.8s linear infinite; margin: 0 auto 16px; }
@@ -307,7 +307,7 @@
     </div>
     <div class="logo-text">
       <h1>Prefab Tracker</h1>
-      <p>REVIT 2022 · ASSEMBLY MANAGEMENT SYSTEM</p>
+      <p>REVIT · ASSEMBLY MANAGEMENT SYSTEM</p>
     </div>
   </div>
   <div class="header-actions">
@@ -420,9 +420,9 @@
     <span class="bulk-count"><span id="bulkCount">0</span> selected</span>
     <div class="bulk-divider"></div>
     <button class="btn btn-primary edit-only" style="padding:6px 14px;font-size:11px;" onclick="openBulkModal()">✎ Edit Selected</button>
-    <button class="btn btn-secondary edit-only" style="padding:6px 14px;font-size:11px;" onclick="bulkDelete()">✕ Delete Selected</button>
+    <button class="btn btn-secondary" style="padding:6px 14px;font-size:11px;" onclick="clearSelection()">Deselect All</button>
     <span style="font-family:var(--mono);font-size:10px;color:var(--text-dim);margin-left:8px;">SHIFT+CLICK range · CTRL+CLICK multi</span>
-    <button class="btn btn-secondary" style="padding:6px 14px;font-size:11px;margin-left:auto;" onclick="clearSelection()">Deselect All</button>
+    <button class="btn btn-secondary edit-only" style="padding:6px 14px;font-size:11px;margin-left:auto;" onclick="bulkDelete()">✕ Delete Selected</button>
   </div>
 
   <div class="table-wrap" id="tableWrap">
@@ -439,9 +439,9 @@
       <thead>
         <tr>
           <th class="col-select"><input type="checkbox" class="row-check" id="selectAll" onchange="toggleSelectAll(this.checked)" title="Select all"></th>
-          <th onclick="sortTable('spool_id')">eV_SpoolId <span class="sort-icon">▴</span></th>
-          <th onclick="sortTable('package_id')">eV_PackageId <span class="sort-icon">▴</span></th>
-          <th onclick="sortTable('lbs_id')">eV_LBS_Id <span class="sort-icon">▴</span></th>
+          <th onclick="sortTable('spool_id')">Spool ID <span class="sort-icon">▴</span></th>
+          <th onclick="sortTable('package_id')">Package ID <span class="sort-icon">▴</span></th>
+          <th onclick="sortTable('lbs_id')">Location <span class="sort-icon">▴</span></th>
           <th onclick="sortTable('release_date')">Release Date <span class="sort-icon">▴</span></th>
           <th style="text-align:center">Prefab Done</th>
           <th onclick="sortTable('ship_date')">Ship Date <span class="sort-icon">▴</span></th>
@@ -473,15 +473,15 @@
     <div class="modal-title">Add Assembly</div>
     <div class="form-grid">
       <div class="form-field">
-        <label class="form-label">eV_SpoolId *</label>
+        <label class="form-label">Spool ID *</label>
         <input class="form-input" id="f_spoolId" placeholder="SP-001">
       </div>
       <div class="form-field">
-        <label class="form-label">eV_PackageId</label>
+        <label class="form-label">Package ID</label>
         <input class="form-input" id="f_packageId" placeholder="PKG-A">
       </div>
       <div class="form-field">
-        <label class="form-label">eV_LBS_Id *</label>
+        <label class="form-label">Location *</label>
         <input class="form-input" id="f_lbsId" placeholder="LEVEL 7 AREA 7">
       </div>
       <div class="form-field">
@@ -946,16 +946,23 @@
   function handleRowClick(id, event) {
     const idx = lastSortedIds.indexOf(id);
     if (event.shiftKey && lastClickedIndex !== -1) {
+      // Shift+click: select range and auto-open bulk edit if editor
       const lo = Math.min(lastClickedIndex, idx), hi = Math.max(lastClickedIndex, idx);
       for (let i=lo; i<=hi; i++) selectedIds.add(lastSortedIds[i]);
+      updateSelectionUI(); renderTable();
+      // Auto-open bulk edit modal for quick editing of the range
+      if (isEditor && selectedIds.size > 1) {
+        setTimeout(() => openBulkModal(), 150);
+      }
     } else if (event.ctrlKey || event.metaKey) {
       if (selectedIds.has(id)) selectedIds.delete(id); else selectedIds.add(id);
       lastClickedIndex = idx;
+      updateSelectionUI(); renderTable();
     } else {
       if (selectedIds.has(id)) selectedIds.delete(id); else selectedIds.add(id);
       lastClickedIndex = idx;
+      updateSelectionUI(); renderTable();
     }
-    updateSelectionUI(); renderTable();
   }
 
   function toggleSelectAll(checked) {
