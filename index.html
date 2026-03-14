@@ -199,6 +199,39 @@
   .toast.show { transform: translateX(0); }
   .toast.error { border-color: var(--danger); border-left-color: var(--danger); }
 
+  /* PIN MODAL */
+  .pin-overlay { position: fixed; inset: 0; background: rgba(5,9,14,0.97); z-index: 400; display: grid; place-items: center; }
+  .pin-overlay.hidden { display: none; }
+  .pin-box { text-align: center; width: 340px; }
+  .pin-logo { width: 56px; height: 56px; border: 2px solid var(--accent); display: grid; place-items: center; margin: 0 auto 24px; clip-path: polygon(8px 0%, 100% 0%, 100% calc(100% - 8px), calc(100% - 8px) 100%, 0% 100%, 0% 8px); background: rgba(0,200,255,0.08); }
+  .pin-logo svg { width: 26px; height: 26px; color: var(--accent); }
+  .pin-title { font-family: var(--sans); font-size: 24px; font-weight: 900; letter-spacing: 4px; text-transform: uppercase; color: var(--text-bright); margin-bottom: 6px; }
+  .pin-sub { font-family: var(--mono); font-size: 10px; letter-spacing: 2px; color: var(--text-dim); margin-bottom: 32px; }
+  .pin-dots { display: flex; justify-content: center; gap: 12px; margin-bottom: 28px; }
+  .pin-dot { width: 14px; height: 14px; border-radius: 50%; border: 2px solid var(--border); transition: all 0.15s; }
+  .pin-dot.filled { background: var(--accent); border-color: var(--accent); box-shadow: 0 0 8px var(--accent); }
+  .pin-dot.error { background: var(--danger); border-color: var(--danger); box-shadow: 0 0 8px var(--danger); animation: shake 0.4s ease; }
+  @keyframes shake { 0%,100%{transform:translateX(0)} 20%,60%{transform:translateX(-6px)} 40%,80%{transform:translateX(6px)} }
+  .pin-pad { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 20px; }
+  .pin-key { background: var(--surface); border: 1px solid var(--border); color: var(--text-bright); font-family: var(--sans); font-size: 22px; font-weight: 700; padding: 16px; cursor: pointer; transition: all 0.15s; user-select: none; }
+  .pin-key:hover { background: var(--surface2); border-color: var(--accent); color: var(--accent); }
+  .pin-key:active { transform: scale(0.95); }
+  .pin-key.del { font-size: 16px; color: var(--text-dim); }
+  .pin-readonly-btn { background: none; border: none; font-family: var(--mono); font-size: 10px; letter-spacing: 2px; color: var(--text-dim); cursor: pointer; text-decoration: underline; padding: 4px; transition: color 0.15s; }
+  .pin-readonly-btn:hover { color: var(--text); }
+
+  /* ACCESS BADGE */
+  .access-badge { display: flex; align-items: center; gap: 7px; font-family: var(--mono); font-size: 10px; letter-spacing: 1px; padding: 6px 12px; border: 1px solid var(--border); cursor: pointer; transition: all 0.2s; }
+  .access-badge.editor { color: var(--accent2); border-color: rgba(255,107,53,0.4); }
+  .access-badge.viewer { color: var(--text-dim); border-color: var(--border); }
+  .access-badge:hover { border-color: var(--accent); color: var(--accent); }
+  .access-icon { font-size: 12px; }
+
+  /* READ-ONLY dimming */
+  body.readonly .edit-only { opacity: 0.25; pointer-events: none; cursor: not-allowed; }
+  body.readonly .custom-check { cursor: not-allowed; }
+  body.readonly .date-input { pointer-events: none; }
+
   /* LOADING OVERLAY */
   .loading-overlay { position: fixed; inset: 0; background: rgba(10,14,20,0.85); z-index: 300; display: grid; place-items: center; }
   .loading-overlay.hidden { display: none; }
@@ -220,6 +253,41 @@
 </style>
 </head>
 <body>
+
+<!-- PIN SCREEN -->
+<div class="pin-overlay" id="pinOverlay">
+  <div class="pin-box">
+    <div class="pin-logo">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"/>
+        <polyline points="9 22 9 12 15 12 15 22"/>
+      </svg>
+    </div>
+    <div class="pin-title">Prefab Tracker</div>
+    <div class="pin-sub">ENTER EDITOR PIN OR CONTINUE AS VIEWER</div>
+    <div class="pin-dots" id="pinDots">
+      <div class="pin-dot" id="pd0"></div>
+      <div class="pin-dot" id="pd1"></div>
+      <div class="pin-dot" id="pd2"></div>
+      <div class="pin-dot" id="pd3"></div>
+    </div>
+    <div class="pin-pad">
+      <div class="pin-key" onclick="pinKey('1')">1</div>
+      <div class="pin-key" onclick="pinKey('2')">2</div>
+      <div class="pin-key" onclick="pinKey('3')">3</div>
+      <div class="pin-key" onclick="pinKey('4')">4</div>
+      <div class="pin-key" onclick="pinKey('5')">5</div>
+      <div class="pin-key" onclick="pinKey('6')">6</div>
+      <div class="pin-key" onclick="pinKey('7')">7</div>
+      <div class="pin-key" onclick="pinKey('8')">8</div>
+      <div class="pin-key" onclick="pinKey('9')">9</div>
+      <div class="pin-key" style="grid-column:1"></div>
+      <div class="pin-key" onclick="pinKey('0')">0</div>
+      <div class="pin-key del" onclick="pinBackspace()">⌫</div>
+    </div>
+    <button class="pin-readonly-btn" onclick="enterReadOnly()">View only — no PIN needed</button>
+  </div>
+</div>
 
 <!-- LOADING -->
 <div class="loading-overlay" id="loadingOverlay">
@@ -247,14 +315,18 @@
       <div class="sync-dot"></div>
       <span id="syncLabel">Connecting...</span>
     </div>
-    <label class="csv-input-label">
+    <div class="access-badge viewer" id="accessBadge" onclick="showPinScreen()" title="Click to enter editor PIN">
+      <span class="access-icon" id="accessIcon">👁</span>
+      <span id="accessLabel">View Only</span>
+    </div>
+    <label class="csv-input-label edit-only">
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
       Import CSV
       <input type="file" id="csvFile" accept=".csv,.txt">
     </label>
-    <button class="btn btn-secondary" onclick="exportCSV()">Export CSV</button>
-    <button class="btn btn-secondary" style="color:var(--danger);border-color:var(--danger);" onclick="clearAll()">Clear All</button>
-    <button class="btn btn-primary" onclick="openModal()">+ Add Assembly</button>
+    <button class="btn btn-secondary edit-only" onclick="exportCSV()">Export CSV</button>
+    <button class="btn btn-secondary edit-only" style="color:var(--danger);border-color:var(--danger);" onclick="clearAll()">Clear All</button>
+    <button class="btn btn-primary edit-only" onclick="openModal()">+ Add Assembly</button>
   </div>
 </header>
 
@@ -347,8 +419,8 @@
   <div class="bulk-toolbar" id="bulkToolbar">
     <span class="bulk-count"><span id="bulkCount">0</span> selected</span>
     <div class="bulk-divider"></div>
-    <button class="btn btn-primary" style="padding:6px 14px;font-size:11px;" onclick="openBulkModal()">✎ Edit Selected</button>
-    <button class="btn btn-secondary" style="padding:6px 14px;font-size:11px;" onclick="bulkDelete()">✕ Delete Selected</button>
+    <button class="btn btn-primary edit-only" style="padding:6px 14px;font-size:11px;" onclick="openBulkModal()">✎ Edit Selected</button>
+    <button class="btn btn-secondary edit-only" style="padding:6px 14px;font-size:11px;" onclick="bulkDelete()">✕ Delete Selected</button>
     <span style="font-family:var(--mono);font-size:10px;color:var(--text-dim);margin-left:8px;">SHIFT+CLICK range · CTRL+CLICK multi</span>
     <button class="btn btn-secondary" style="padding:6px 14px;font-size:11px;margin-left:auto;" onclick="clearSelection()">Deselect All</button>
   </div>
@@ -498,8 +570,97 @@
   let lastSortedIds = [];
   let realtimeChannel = null;
 
+  // ─── PIN / ACCESS CONTROL ────────────────────────────────────────
+  const EDITOR_PIN = '1884'; // ← CHANGE THIS TO YOUR PIN
+  let pinEntry = '';
+  let isEditor = false;
+
+  function pinKey(digit) {
+    if (pinEntry.length >= 4) return;
+    pinEntry += digit;
+    updatePinDots();
+    if (pinEntry.length === 4) {
+      setTimeout(checkPin, 120);
+    }
+  }
+
+  function pinBackspace() {
+    pinEntry = pinEntry.slice(0, -1);
+    updatePinDots();
+  }
+
+  function updatePinDots(state) {
+    for (let i = 0; i < 4; i++) {
+      const dot = document.getElementById(`pd${i}`);
+      dot.className = 'pin-dot' + (i < pinEntry.length ? ' filled' : '') + (state === 'error' ? ' error' : '');
+    }
+  }
+
+  function checkPin() {
+    if (pinEntry === EDITOR_PIN) {
+      enterEditor();
+    } else {
+      updatePinDots('error');
+      pinEntry = '';
+      setTimeout(() => updatePinDots(), 600);
+    }
+  }
+
+  function enterEditor() {
+    isEditor = true;
+    document.body.classList.remove('readonly');
+    document.getElementById('pinOverlay').classList.add('hidden');
+    document.getElementById('accessBadge').className = 'access-badge editor';
+    document.getElementById('accessIcon').textContent = '✎';
+    document.getElementById('accessLabel').textContent = 'Editor';
+    sessionStorage.setItem('prefab_access', 'editor');
+  }
+
+  function enterReadOnly() {
+    isEditor = false;
+    document.body.classList.add('readonly');
+    document.getElementById('pinOverlay').classList.add('hidden');
+    document.getElementById('accessBadge').className = 'access-badge viewer';
+    document.getElementById('accessIcon').textContent = '👁';
+    document.getElementById('accessLabel').textContent = 'View Only';
+    sessionStorage.setItem('prefab_access', 'viewer');
+  }
+
+  function showPinScreen() {
+    if (isEditor) {
+      // Already editor — clicking badge logs out
+      if (confirm('Switch back to View Only mode?')) enterReadOnly();
+      return;
+    }
+    pinEntry = '';
+    updatePinDots();
+    document.getElementById('pinOverlay').classList.remove('hidden');
+  }
+
+  // Keyboard support for PIN
+  document.addEventListener('keydown', e => {
+    const pinVisible = !document.getElementById('pinOverlay').classList.contains('hidden');
+    if (pinVisible) {
+      if (e.key >= '0' && e.key <= '9') pinKey(e.key);
+      if (e.key === 'Backspace') pinBackspace();
+      if (e.key === 'Escape') enterReadOnly();
+      return; // don't process other shortcuts while PIN is showing
+    }
+    if (e.key === 'Escape') { closeModal(); closeBulkModal(); document.getElementById('mapModalOverlay').classList.remove('open'); }
+    if (e.key === 'Enter' && document.getElementById('modalOverlay').classList.contains('open')) addRow();
+  });
+
   // ─── INIT ────────────────────────────────────────────────────────
   async function init() {
+    // Restore session if they already entered PIN this session
+    const saved = sessionStorage.getItem('prefab_access');
+    if (saved === 'editor') {
+      enterEditor();
+    } else {
+      enterReadOnly(); // start read-only, show PIN screen
+      document.getElementById('pinOverlay').classList.remove('hidden');
+    }
+
     setSync('connecting', 'Connecting...');
     try {
       await loadAll();
@@ -667,7 +828,7 @@
           </div>
         </td>
         <td>${getStatusBadge(a)}</td>
-        <td><button class="btn btn-danger" style="padding:4px 10px;font-size:10px;clip-path:none;" onclick="deleteRow('${a.id}')">✕</button></td>
+        <td><button class="btn btn-danger edit-only" style="padding:4px 10px;font-size:10px;clip-path:none;" onclick="deleteRow('${a.id}')">✕</button></td>
       </tr>`).join('');
 
     updateSelectionUI();
@@ -748,6 +909,7 @@
 
   // ─── DB MUTATIONS ────────────────────────────────────────────────
   async function updateField(id, field, value) {
+    if (!isEditor) return;
     const a = assemblies.find(x=>x.id===id);
     if (!a) return;
     a[field] = value;
@@ -759,6 +921,7 @@
   }
 
   async function toggleBool(id, field) {
+    if (!isEditor) return;
     const a = assemblies.find(x=>x.id===id);
     if (!a) return;
     a[field] = !a[field];
@@ -1068,11 +1231,6 @@
     t.textContent=msg; t.className='toast show'+(isError?' error':'');
     clearTimeout(toastTimer); toastTimer=setTimeout(()=>t.classList.remove('show'),3200);
   }
-
-  document.addEventListener('keydown', e => {
-    if (e.key==='Escape') { closeModal(); closeBulkModal(); document.getElementById('mapModalOverlay').classList.remove('open'); }
-    if (e.key==='Enter'&&document.getElementById('modalOverlay').classList.contains('open')) addRow();
-  });
 
   init();
 </script>
