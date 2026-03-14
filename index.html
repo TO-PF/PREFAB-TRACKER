@@ -194,6 +194,24 @@
   .mini-bar { height: 4px; background: var(--border); position: relative; }
   .mini-fill { height: 100%; transition: width 0.4s; }
 
+  /* DRAWING BUTTON */
+  .btn-drawing { background: transparent; color: var(--accent); border: 1px solid var(--accent); font-family: var(--mono); font-size: 10px; padding: 4px 10px; cursor: pointer; transition: all 0.15s; white-space: nowrap; }
+  .btn-drawing:hover { background: var(--accent); color: #fff; }
+  .btn-drawing.no-link { color: var(--text-dim); border-color: var(--border); cursor: default; }
+  .btn-drawing.no-link:hover { background: transparent; color: var(--text-dim); }
+
+  /* SHEET MANAGER */
+  .sheet-manager { background: var(--surface); border: 1px solid var(--border); padding: 20px 24px; margin-bottom: 28px; }
+  .sheet-manager-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 0; cursor: pointer; }
+  .sheet-manager-header h3 { font-family: var(--sans); font-size: 13px; font-weight: 700; letter-spacing: 3px; text-transform: uppercase; color: var(--text-bright); }
+  .sheet-manager-body { margin-top: 16px; display: none; }
+  .sheet-manager-body.open { display: block; }
+  .sheet-table { width: 100%; border-collapse: collapse; font-size: 12px; margin-top: 12px; }
+  .sheet-table th { background: #dce6f0; border-bottom: 2px solid var(--accent); padding: 8px 12px; text-align: left; font-family: var(--mono); font-size: 10px; letter-spacing: 2px; color: var(--accent); text-transform: uppercase; }
+  .sheet-table td { padding: 8px 12px; border-bottom: 1px solid var(--border); font-family: var(--mono); font-size: 11px; color: var(--text); }
+  .sheet-table tr:hover td { background: var(--surface2); }
+  .sheet-empty { font-family: var(--mono); font-size: 11px; color: var(--text-dim); padding: 20px 0; text-align: center; }
+
   /* TOAST */
   .toast { position: fixed; bottom: 24px; right: 24px; background: var(--surface); border: 1px solid var(--accent); border-left: 4px solid var(--accent); padding: 14px 20px; font-family: var(--mono); font-size: 12px; color: var(--text); z-index: 200; transform: translateX(120%); transition: transform 0.3s ease; max-width: 320px; }
   .toast.show { transform: translateX(0); }
@@ -446,12 +464,36 @@
           <th style="text-align:center">Prefab Done</th>
           <th onclick="sortTable('ship_date')">Ship Date <span class="sort-icon">▴</span></th>
           <th style="text-align:center">Installed</th>
+          <th onclick="sortTable('sheet_number')">Sheet <span class="sort-icon">▴</span></th>
+          <th>Drawing</th>
           <th>Status</th>
           <th>Actions</th>
         </tr>
       </thead>
       <tbody id="tableBody"></tbody>
     </table>
+  </div>
+
+  <div class="sheet-manager edit-only" id="sheetManager">
+    <div class="sheet-manager-header" onclick="toggleSheetManager()">
+      <h3>📋 Sheet Lookup Table <span id="sheetCount" style="color:var(--text-dim);font-weight:400;font-size:11px;"></span></h3>
+      <div style="display:flex;align-items:center;gap:12px;">
+        <label class="csv-input-label" style="padding:5px 14px;font-size:11px;" onclick="event.stopPropagation()">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+          Import Sheet CSV
+          <input type="file" id="sheetCsvFile" accept=".csv,.txt" onchange="importSheetCSV(this)">
+        </label>
+        <span id="sheetManagerToggle" style="font-family:var(--mono);font-size:11px;color:var(--text-dim);">▼ Show</span>
+      </div>
+    </div>
+    <div class="sheet-manager-body" id="sheetManagerBody">
+      <div style="font-family:var(--mono);font-size:10px;color:var(--text-dim);margin-bottom:12px;line-height:1.8;">
+        Import a CSV with columns: <strong style="color:var(--accent)">SheetNumber, SheetName, ACCLink</strong><br>
+        Sheet numbers must match exactly what's in your Revit export (e.g. <strong>M-701</strong>).<br>
+        After importing, any assembly CSV with an <strong>eV_SheetNumber</strong> column will auto-link drawings.
+      </div>
+      <div id="sheetTableWrap"><div class="sheet-empty">No sheets loaded — import your ACC sheet CSV above</div></div>
+    </div>
   </div>
 
   <div class="breakdown-section">
@@ -675,9 +717,16 @@
 
   async function loadAll() {
     document.getElementById('loadingText').textContent = 'Loading assemblies...';
-    const { data, error } = await sb.from('assemblies').select('*').order('created_at', { ascending: true });
-    if (error) throw error;
-    assemblies = data.map(dbToLocal);
+    const [asmRes, sheetRes] = await Promise.all([
+      sb.from('assemblies').select('*').order('created_at', { ascending: true }),
+      sb.from('sheets').select('*').order('sheet_number', { ascending: true })
+    ]);
+    if (asmRes.error) throw asmRes.error;
+    assemblies = asmRes.data.map(dbToLocal);
+    if (!sheetRes.error) {
+      sheets = sheetRes.data.map(r => ({ id: r.id, sheetNumber: r.sheet_number || '', sheetName: r.sheet_name || '', accLink: r.acc_link || '' }));
+      renderSheetTable();
+    }
     render();
   }
 
@@ -720,6 +769,8 @@
       prefabDone: row.prefab_done || false,
       shipDate: row.ship_date || '',
       installed: row.installed || false,
+      sheetNumber: row.sheet_number || '',
+      drawingUrl: row.drawing_url || '',
     };
   }
 
@@ -732,6 +783,8 @@
       prefab_done: a.prefabDone,
       ship_date: a.shipDate || null,
       installed: a.installed,
+      sheet_number: a.sheetNumber || null,
+      drawing_url: a.drawingUrl || null,
     };
   }
 
@@ -826,6 +879,12 @@
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
             </div>
           </div>
+        </td>
+        <td class="td-id" style="font-size:10px;">${a.sheetNumber || '<span style="color:var(--text-dim)">—</span>'}</td>
+        <td>
+          ${a.drawingUrl
+            ? `<button class="btn-drawing" onclick="window.open('${a.drawingUrl}','_blank')">📄 Open</button>`
+            : `<button class="btn-drawing no-link" title="No drawing linked">📄 —</button>`}
         </td>
         <td>${getStatusBadge(a)}</td>
         <td><button class="btn btn-danger edit-only" style="padding:4px 10px;font-size:10px;clip-path:none;" onclick="deleteRow('${a.id}')">✕</button></td>
@@ -1158,6 +1217,7 @@
         prefabDone:  autoMapIndex(csvParsedHeaders,['prefabdone','prefabcomplete','prefab']),
         shipDate:    autoMapIndex(csvParsedHeaders,['shipdate','shipped','shiptosite']),
         installed:   autoMapIndex(csvParsedHeaders,['installed','installedinfield','install']),
+        sheetNumber: autoMapIndex(csvParsedHeaders,['sheetnumber','sheetno','sheet','evsheet']),
       };
       openMappingModal(autoMap, delim);
       e.target.value='';
@@ -1167,10 +1227,10 @@
 
   function openMappingModal(autoMap, delim) {
     const fields = [
-      {key:'spoolId',label:'eV_SpoolId',required:true},{key:'packageId',label:'eV_PackageId',required:false},
-      {key:'lbsId',label:'eV_LBS_Id',required:true},{key:'releaseDate',label:'Release Date',required:false},
+      {key:'spoolId',label:'Spool ID',required:true},{key:'packageId',label:'Package ID',required:false},
+      {key:'lbsId',label:'Location',required:true},{key:'releaseDate',label:'Release Date',required:false},
       {key:'prefabDone',label:'Prefab Done',required:false},{key:'shipDate',label:'Ship Date',required:false},
-      {key:'installed',label:'Installed',required:false},
+      {key:'installed',label:'Installed',required:false},{key:'sheetNumber',label:'Sheet Number (eV_SheetNumber)',required:false},
     ];
     const optHtml = ['<option value="-1">— skip —</option>',...csvParsedHeaders.map((h,i)=>`<option value="${i}">${h}</option>`)].join('');
     const rowsHtml = fields.map(f=>`
@@ -1192,7 +1252,12 @@
 
   async function confirmMapping() {
     const getIdx = id => parseInt(document.getElementById(id)?.value??'-1');
-    const map = { spoolId:getIdx('map_spoolId'), packageId:getIdx('map_packageId'), lbsId:getIdx('map_lbsId'), releaseDate:getIdx('map_releaseDate'), prefabDone:getIdx('map_prefabDone'), shipDate:getIdx('map_shipDate'), installed:getIdx('map_installed') };
+    const map = {
+      spoolId:getIdx('map_spoolId'), packageId:getIdx('map_packageId'), lbsId:getIdx('map_lbsId'),
+      releaseDate:getIdx('map_releaseDate'), prefabDone:getIdx('map_prefabDone'),
+      shipDate:getIdx('map_shipDate'), installed:getIdx('map_installed'),
+      sheetNumber:getIdx('map_sheetNumber'),
+    };
     if (map.spoolId<0&&map.packageId<0&&map.lbsId<0) { showToast('Map at least one ID column'); return; }
 
     const existingSpoolIds = new Set(assemblies.map(a=>a.spoolId.toLowerCase().trim()));
@@ -1203,7 +1268,18 @@
       const spoolId=get(map.spoolId), packageId=get(map.packageId), lbsId=get(map.lbsId);
       if (!spoolId&&!packageId&&!lbsId) return;
       if (spoolId&&existingSpoolIds.has(spoolId.toLowerCase().trim())) { skipped++; return; }
-      toInsert.push({ spool_id:spoolId||`SP-${String(i+1).padStart(3,'0')}`, package_id:packageId||null, lbs_id:lbsId||null, release_date:get(map.releaseDate)||null, prefab_done:['true','1','yes','x'].includes(get(map.prefabDone).toLowerCase()), ship_date:get(map.shipDate)||null, installed:['true','1','yes','x'].includes(get(map.installed).toLowerCase()) });
+      const sheetNumber = get(map.sheetNumber);
+      const drawingUrl  = sheetLookup(sheetNumber);
+      toInsert.push({
+        spool_id:spoolId||`SP-${String(i+1).padStart(3,'0')}`,
+        package_id:packageId||null, lbs_id:lbsId||null,
+        release_date:get(map.releaseDate)||null,
+        prefab_done:['true','1','yes','x'].includes(get(map.prefabDone).toLowerCase()),
+        ship_date:get(map.shipDate)||null,
+        installed:['true','1','yes','x'].includes(get(map.installed).toLowerCase()),
+        sheet_number: sheetNumber || null,
+        drawing_url: drawingUrl || null,
+      });
       existingSpoolIds.add(spoolId.toLowerCase().trim());
     });
 
@@ -1214,7 +1290,6 @@
     document.getElementById('loadingText').textContent = `Importing ${toInsert.length} assemblies...`;
     document.getElementById('loadingOverlay').classList.remove('hidden');
 
-    // Insert in batches of 200
     const batchSize=200;
     for (let i=0;i<toInsert.length;i+=batchSize) {
       const batch=toInsert.slice(i,i+batchSize);
@@ -1225,7 +1300,10 @@
 
     document.getElementById('loadingOverlay').classList.add('hidden');
     render(); setSync('connected','Live · All users synced');
-    const msg = skipped>0 ? `✓ Imported ${toInsert.length} · Skipped ${skipped} duplicates` : `✓ Imported ${toInsert.length} assemblies`;
+    const linked = toInsert.filter(r => r.drawing_url).length;
+    const msg = skipped>0
+      ? `✓ Imported ${toInsert.length} · Skipped ${skipped} · ${linked} drawings linked`
+      : `✓ Imported ${toInsert.length} assemblies · ${linked} drawings linked`;
     showToast(msg);
   }
 
@@ -1240,6 +1318,128 @@
     const link=document.createElement('a');
     link.href=url; link.download=`prefab_tracker_${new Date().toISOString().slice(0,10)}.csv`; link.click();
     URL.revokeObjectURL(url); showToast('CSV exported');
+  }
+
+  // ─── SHEETS ──────────────────────────────────────────────────────
+  let sheets = []; // { id, sheetNumber, sheetName, accLink }
+
+  async function loadSheets() {
+    const { data, error } = await sb.from('sheets').select('*').order('sheet_number', { ascending: true });
+    if (error) { console.error('Sheet load error:', error); return; }
+    sheets = data.map(r => ({ id: r.id, sheetNumber: r.sheet_number || '', sheetName: r.sheet_name || '', accLink: r.acc_link || '' }));
+    renderSheetTable();
+  }
+
+  function sheetLookup(sheetNumber) {
+    if (!sheetNumber) return '';
+    const s = sheets.find(s => s.sheetNumber.toLowerCase().trim() === sheetNumber.toLowerCase().trim());
+    return s ? s.accLink : '';
+  }
+
+  function toggleSheetManager() {
+    const body = document.getElementById('sheetManagerBody');
+    const toggle = document.getElementById('sheetManagerToggle');
+    const open = body.classList.toggle('open');
+    toggle.textContent = open ? '▲ Hide' : '▼ Show';
+  }
+
+  function renderSheetTable() {
+    const wrap = document.getElementById('sheetTableWrap');
+    const count = document.getElementById('sheetCount');
+    count.textContent = sheets.length ? `(${sheets.length} sheets)` : '';
+    if (!sheets.length) {
+      wrap.innerHTML = '<div class="sheet-empty">No sheets loaded — import your ACC sheet CSV above</div>';
+      return;
+    }
+    wrap.innerHTML = `
+      <table class="sheet-table">
+        <thead><tr>
+          <th>Sheet Number</th><th>Sheet Name</th><th>ACC Link</th><th>Action</th>
+        </tr></thead>
+        <tbody>
+          ${sheets.map(s => `
+            <tr>
+              <td>${s.sheetNumber}</td>
+              <td>${s.sheetName}</td>
+              <td style="max-width:300px;overflow:hidden;text-overflow:ellipsis;">
+                ${s.accLink ? `<a href="${s.accLink}" target="_blank" style="color:var(--accent);font-size:10px;">🔗 ${s.accLink.substring(0,50)}...</a>` : '<span style="color:var(--text-dim)">—</span>'}
+              </td>
+              <td><button class="btn btn-danger" style="padding:3px 8px;font-size:10px;clip-path:none;" onclick="deleteSheet('${s.id}')">✕</button></td>
+            </tr>`).join('')}
+        </tbody>
+      </table>`;
+  }
+
+  async function importSheetCSV(input) {
+    const file = input.files[0]; if (!file) return;
+    const reader = new FileReader();
+    reader.onload = async function(ev) {
+      let raw = ev.target.result.replace(/^\uFEFF/,'').replace(/\r\n/g,'\n').replace(/\r/g,'\n');
+      const lines = raw.split('\n').filter(l => l.trim());
+      if (lines.length < 2) { showToast('Sheet CSV appears empty', true); return; }
+
+      const nonBlank = lines.find(l => l.replace(/,/g,'').trim());
+      const delim = detectDelimiter(nonBlank || lines[0]);
+      const headers = parseCSVLine(lines[0], delim).map(h => h.replace(/^"|"$/g,'').replace(/^\uFEFF/,'').trim().toLowerCase().replace(/[\s_]/g,''));
+
+      const iSheet = headers.findIndex(h => h.includes('sheetnumber') || h.includes('sheet'));
+      const iName  = headers.findIndex(h => h.includes('sheetname') || h.includes('name') || h.includes('title'));
+      const iLink  = headers.findIndex(h => h.includes('acclink') || h.includes('link') || h.includes('url'));
+
+      if (iSheet < 0) { showToast('Could not find SheetNumber column in CSV', true); return; }
+
+      const toUpsert = [];
+      for (let i = 1; i < lines.length; i++) {
+        const cols = parseCSVLine(lines[i], delim).map(c => c.replace(/^"|"$/g,'').trim());
+        const sheetNumber = iSheet >= 0 ? cols[iSheet] : '';
+        if (!sheetNumber) continue;
+        toUpsert.push({
+          sheet_number: sheetNumber,
+          sheet_name:   iName >= 0 ? cols[iName] : '',
+          acc_link:     iLink >= 0 ? cols[iLink] : '',
+        });
+      }
+
+      if (!toUpsert.length) { showToast('No valid sheet rows found', true); return; }
+
+      setSync('syncing', `Importing ${toUpsert.length} sheets...`);
+      const { error } = await sb.from('sheets').upsert(toUpsert, { onConflict: 'sheet_number' });
+      if (error) { showToast('Sheet import failed: ' + error.message, true); setSync('error','Failed'); return; }
+
+      await loadSheets();
+
+      // Re-resolve drawing URLs for all assemblies that now have a matching sheet
+      await resolveDrawingUrls();
+
+      setSync('connected', 'Live · All users synced');
+      showToast(`✓ Imported ${toUpsert.length} sheets — drawing links updated`);
+      input.value = '';
+
+      // Auto-open sheet manager so user can see results
+      const body = document.getElementById('sheetManagerBody');
+      if (!body.classList.contains('open')) toggleSheetManager();
+    };
+    reader.readAsText(file);
+  }
+
+  async function resolveDrawingUrls() {
+    // For every assembly with a sheet_number, look up the ACC link and save it
+    const toUpdate = assemblies.filter(a => a.sheetNumber);
+    if (!toUpdate.length) return;
+    const updates = toUpdate.map(a => {
+      const url = sheetLookup(a.sheetNumber);
+      a.drawingUrl = url;
+      return { id: a.id, ...localToDb(a) };
+    });
+    await sb.from('assemblies').upsert(updates);
+    renderTable();
+  }
+
+  async function deleteSheet(id) {
+    sheets = sheets.filter(s => s.id !== id);
+    renderSheetTable();
+    await sb.from('sheets').delete().eq('id', id);
+    showToast('Sheet removed');
   }
 
   // ─── MISC ────────────────────────────────────────────────────────
