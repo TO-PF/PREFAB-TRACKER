@@ -341,6 +341,7 @@
     <div class="stat-card" style="--accent-color:var(--warning)"><div class="label">Released</div><div class="value" id="wpStatReleased">0</div><div class="pct" id="wpStatReleasedPct"></div></div>
     <div class="stat-card" style="--accent-color:#0a6aac"><div class="label">Prefab Done</div><div class="value" id="wpStatPrefab">0</div><div class="pct" id="wpStatPrefabPct"></div></div>
     <div class="stat-card" style="--accent-color:#0a6aac"><div class="label">Shipped</div><div class="value" id="wpStatShipped">0</div><div class="pct" id="wpStatShippedPct"></div></div>
+    <div class="stat-card" style="--accent-color:#7c3aed"><div class="label">Pulled</div><div class="value" id="wpStatPulled">0</div><div class="pct" id="wpStatPulledPct"></div></div>
     <div class="stat-card" style="--accent-color:var(--success)"><div class="label">Terminated</div><div class="value" id="wpStatTerminated">0</div><div class="pct" id="wpStatTerminatedPct"></div></div>
   </div>
 
@@ -1186,6 +1187,8 @@ function updateWpStats() {
   document.getElementById('wpStatPrefabPct').textContent = pct(prefab);
   document.getElementById('wpStatShipped').textContent = shipped;
   document.getElementById('wpStatShippedPct').textContent = pct(shipped);
+  document.getElementById('wpStatPulled').textContent = pulled;
+  document.getElementById('wpStatPulledPct').textContent = pct(pulled);
   document.getElementById('wpStatTerminated').textContent = terminated;
   document.getElementById('wpStatTerminatedPct').textContent = pct(terminated);
   const setBar = (id, val) => { document.getElementById('wpb-' + id).style.width = pct(val); document.getElementById('wpp-' + id).textContent = pct(val); };
