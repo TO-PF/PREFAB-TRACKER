@@ -282,8 +282,6 @@
           <th style="text-align:center">Prefab Done</th>
           <th onclick="sortTable('ship_date')">Ship Date <span class="sort-icon">▴</span></th>
           <th style="text-align:center">Installed</th>
-          <th onclick="sortTable('sheet_number')">Sheet <span class="sort-icon">▴</span></th>
-          <th>Drawing</th>
           <th>Status</th>
           <th>Actions</th>
         </tr>
@@ -591,12 +589,6 @@ function renderTable() {
         ${isEditor
           ? `<div class="check-cell"><div class="check-box ${a.installed ? 'checked' : ''}" onclick="toggleField('${a.id}','installed',${!a.installed});event.stopPropagation()"></div></div>`
           : `<div class="check-cell"><div class="check-box ${a.installed ? 'checked' : ''}" style="cursor:default;opacity:0.7;"></div></div>`}
-      </td>
-      <td style="font-family:var(--mono);font-size:11px;">${a.sheetNumber || '<span style="color:var(--text-dim)">—</span>'}</td>
-      <td>
-        ${hasDrawing
-          ? `<a href="${a.drawingUrl}" target="_blank" class="drawing-btn has-link">📄 Open</a>`
-          : `<span class="drawing-btn">📄 —</span>`}
       </td>
       <td><span class="status-badge status-${status}">${status}</span></td>
       <td onclick="event.stopPropagation()">
