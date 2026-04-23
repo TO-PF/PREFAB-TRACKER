@@ -1324,11 +1324,13 @@ async function confirmWpMapping() {
   if (map.panelId < 0) { showToast('Map Panel ID column', true); return; }
 
   const toInsert = [];
+  const seen = new Set();
 
   wpCsvRows.forEach(cols => {
     const get = idx => idx >= 0 && idx < cols.length ? cols[idx] : '';
-    const panelId = get(map.panelId);
-    if (!panelId) return;
+    const panelId = get(map.panelId).trim();
+    if (!panelId || seen.has(panelId.toLowerCase())) return;
+    seen.add(panelId.toLowerCase());
     toInsert.push({
       panel_name:   panelId,
       location:     get(map.location),
