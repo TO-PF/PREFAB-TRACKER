@@ -693,9 +693,10 @@ function enterApp() {
   sessionStorage.setItem('pf_editor', isEditor ? '1' : '0');
   init();
 }
-// Check session — run immediately since DOM is already ready
-if (sessionStorage.getItem('pf_editor') !== null) {
-  isEditor = sessionStorage.getItem('pf_editor') === '1';
+// Check session — restore editor state and start app
+const _savedSession = sessionStorage.getItem('pf_editor');
+if (_savedSession !== null) {
+  isEditor = _savedSession === '1';
   document.getElementById('pinOverlay').style.display = 'none';
   if (isEditor) {
     document.body.classList.add('editor');
@@ -703,7 +704,7 @@ if (sessionStorage.getItem('pf_editor') !== null) {
     document.getElementById('sheetManager').style.display = 'block';
     document.getElementById('wpPdfSection').style.display = 'block';
   }
-  setTimeout(init, 0);
+  setTimeout(init, 50);
 }
 
 // ─── INIT ────────────────────────────────────────────────────────
@@ -1374,7 +1375,7 @@ async function handleDrawingFiles(files) {
 async function handleWpFiles(files) {
   const pdfs=Array.from(files).filter(f=>f.name.toLowerCase().endsWith('.pdf'));
   if(!pdfs.length){showToast('No PDF files found',true);return;}
-  await uploadPdfs(pdfs,'wirepulls',async(panelName,url)=>{
+  await uploadPdfs(pdfs,'wire pulls',async(panelName,url)=>{
     // Check if panel already exists
     const existing = wirePulls.find(w=>w.panelName.toLowerCase()===panelName.toLowerCase());
     if(existing) {
@@ -1476,7 +1477,9 @@ function showToast(msg,isError=false){
   clearTimeout(toastTimer);toastTimer=setTimeout(()=>t.classList.remove('show'),3200);
 }
 
-init();
+// ─── STARTUP ─────────────────────────────────────────────────────
+// Only init once — either from PIN entry or session restore
+// Do NOT call init() unconditionally here
 </script>
 </body>
 </html>
