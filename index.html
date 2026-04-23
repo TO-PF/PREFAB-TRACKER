@@ -374,6 +374,14 @@
     <button class="btn btn-primary edit-only" style="padding:5px 14px;font-size:11px;" onclick="openAddWpModal()">+ Add Panel</button>
   </div>
 
+  <div class="bulk-toolbar" id="wpBulkToolbar">
+    <span class="bulk-count"><span id="wpBulkCount">0</span> selected</span>
+    <div class="bulk-divider"></div>
+    <button class="btn btn-primary edit-only" style="padding:5px 14px;font-size:11px;" onclick="openWpBulkModal()">✎ Edit Selected</button>
+    <button class="btn btn-secondary" style="padding:5px 12px;font-size:11px;" onclick="clearWpSelection()">Deselect All</button>
+    <button class="btn btn-danger edit-only" style="padding:5px 12px;font-size:11px;margin-left:auto;" onclick="bulkDeleteWp()">✕ Delete</button>
+  </div>
+
   <div class="table-wrap">
     <div class="empty-state" id="wpEmptyState">
       <div class="empty-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M13 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V9z"/><polyline points="13 2 13 9 20 9"/></svg></div>
@@ -383,6 +391,7 @@
     <table id="wpTable" style="display:none;">
       <thead>
         <tr>
+          <th class="col-select"><input type="checkbox" class="row-check" id="wpSelectAll" onchange="toggleWpSelectAll(this.checked)"></th>
           <th onclick="sortWpTable('panel_id')">Panel ID <span class="sort-icon">▴</span></th>
           <th onclick="sortWpTable('location')">Location <span class="sort-icon">▴</span></th>
           <th onclick="sortWpTable('release_date')">Released <span class="sort-icon">▴</span></th>
@@ -399,6 +408,47 @@
 </div><!-- end viewWirePulls -->
 
 </main>
+
+<!-- WIRE PULL BULK EDIT MODAL -->
+<div class="modal-overlay" id="wpBulkModalOverlay">
+  <div class="modal" style="width:480px;">
+    <button class="close-modal" onclick="closeWpBulkModal()">×</button>
+    <div class="modal-title">Bulk Edit <span id="wpBulkModalCount" style="color:var(--accent);font-size:14px;"></span></div>
+    <div style="font-family:var(--mono);font-size:10px;color:var(--text-dim);margin-bottom:20px;">LEAVE FIELDS BLANK TO KEEP EXISTING VALUES</div>
+    <div class="form-grid">
+      <div class="form-field"><label class="form-label">Release Date</label><input class="form-input" type="date" id="wpBulk_releaseDate"></div>
+      <div class="form-field"><label class="form-label">Ship Date</label><input class="form-input" type="date" id="wpBulk_shipDate"></div>
+      <div class="form-field full">
+        <label class="form-label" style="margin-bottom:10px;">Prefab Done</label>
+        <div style="display:flex;gap:10px;">
+          <label style="display:flex;align-items:center;gap:8px;font-family:var(--mono);font-size:11px;cursor:pointer;"><input type="radio" name="wpBulk_prefab" value="no-change" checked> No change</label>
+          <label style="display:flex;align-items:center;gap:8px;font-family:var(--mono);font-size:11px;cursor:pointer;"><input type="radio" name="wpBulk_prefab" value="true"> ✓ Mark Done</label>
+          <label style="display:flex;align-items:center;gap:8px;font-family:var(--mono);font-size:11px;cursor:pointer;"><input type="radio" name="wpBulk_prefab" value="false"> ✕ Undo</label>
+        </div>
+      </div>
+      <div class="form-field full">
+        <label class="form-label" style="margin-bottom:10px;">Pulled</label>
+        <div style="display:flex;gap:10px;">
+          <label style="display:flex;align-items:center;gap:8px;font-family:var(--mono);font-size:11px;cursor:pointer;"><input type="radio" name="wpBulk_pulled" value="no-change" checked> No change</label>
+          <label style="display:flex;align-items:center;gap:8px;font-family:var(--mono);font-size:11px;cursor:pointer;"><input type="radio" name="wpBulk_pulled" value="true"> ✓ Mark Pulled</label>
+          <label style="display:flex;align-items:center;gap:8px;font-family:var(--mono);font-size:11px;cursor:pointer;"><input type="radio" name="wpBulk_pulled" value="false"> ✕ Undo</label>
+        </div>
+      </div>
+      <div class="form-field full">
+        <label class="form-label" style="margin-bottom:10px;">Terminated</label>
+        <div style="display:flex;gap:10px;">
+          <label style="display:flex;align-items:center;gap:8px;font-family:var(--mono);font-size:11px;cursor:pointer;"><input type="radio" name="wpBulk_terminated" value="no-change" checked> No change</label>
+          <label style="display:flex;align-items:center;gap:8px;font-family:var(--mono);font-size:11px;cursor:pointer;"><input type="radio" name="wpBulk_terminated" value="true"> ✓ Mark Terminated</label>
+          <label style="display:flex;align-items:center;gap:8px;font-family:var(--mono);font-size:11px;cursor:pointer;"><input type="radio" name="wpBulk_terminated" value="false"> ✕ Undo</label>
+        </div>
+      </div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-secondary" onclick="closeWpBulkModal()">Cancel</button>
+      <button class="btn btn-primary" onclick="applyWpBulkEdit()">Apply to Selected</button>
+    </div>
+  </div>
+</div>
 
 <!-- WIRE PULL CSV MAPPING MODAL -->
 <div class="modal-overlay" id="wpMapModalOverlay">
@@ -1141,10 +1191,18 @@ function renderWpTable(filtered) {
   if (!filtered.length) { empty.style.display = 'block'; table.style.display = 'none'; return; }
   empty.style.display = 'none'; table.style.display = 'table';
   tbody.innerHTML = filtered.map(w => `
-    <tr>
+    <tr data-id="${w.id}" style="${wpSelectedIds.has(w.id) ? 'background:rgba(10,74,124,0.06)' : ''}">
+      <td class="col-select" onclick="event.stopPropagation()">
+        <input type="checkbox" class="row-check" ${wpSelectedIds.has(w.id) ? 'checked' : ''} 
+          onchange="if(this.checked)wpSelectedIds.add('${w.id}');else wpSelectedIds.delete('${w.id}');updateWpBulkToolbar();applyWpFilters();">
+      </td>
       <td style="font-family:var(--mono);font-size:12px;font-weight:600;">${w.panelId}</td>
       <td style="font-size:12px;">${w.location || '<span style="color:var(--text-dim)">—</span>'}</td>
-      <td style="font-family:var(--mono);font-size:11px;">${w.releaseDate || '<span style="color:var(--text-dim)">—</span>'}</td>
+      <td>
+        ${isEditor
+          ? `<input type="date" value="${w.releaseDate || ''}" onchange="updateWpField('${w.id}','releaseDate',this.value)" style="font-family:var(--mono);font-size:11px;background:transparent;border:none;color:${w.releaseDate ? 'var(--text)' : 'var(--text-dim)'};cursor:pointer;outline:none;">`
+          : `<span style="font-family:var(--mono);font-size:11px;">${w.releaseDate || '<span style="color:var(--text-dim)">—</span>'}</span>`}
+      </td>
       <td style="text-align:center">
         ${isEditor
           ? `<div class="check-cell"><div class="check-box ${w.prefabDone ? 'checked' : ''}" onclick="toggleWpField('${w.id}','prefabDone',${!w.prefabDone})"></div></div>`
@@ -1242,6 +1300,69 @@ async function deleteWp(id) {
   showToast('Wire pull deleted');
 }
 
+let wpSelectedIds = new Set();
+
+function updateWpBulkToolbar() {
+  const tb = document.getElementById('wpBulkToolbar');
+  const n = wpSelectedIds.size;
+  if (n > 0) { tb.classList.add('visible'); document.getElementById('wpBulkCount').textContent = n; }
+  else tb.classList.remove('visible');
+}
+function toggleWpSelectAll(checked) { 
+  const rows = document.querySelectorAll('#wpTableBody tr');
+  rows.forEach(r => { const id = r.dataset.id; if (id) { if (checked) wpSelectedIds.add(id); else wpSelectedIds.delete(id); } });
+  updateWpBulkToolbar(); applyWpFilters();
+}
+function clearWpSelection() { wpSelectedIds.clear(); updateWpBulkToolbar(); applyWpFilters(); }
+
+function openWpBulkModal() {
+  if (!wpSelectedIds.size) return;
+  document.getElementById('wpBulkModalCount').textContent = wpSelectedIds.size + ' panels';
+  document.getElementById('wpBulkModalOverlay').classList.add('open');
+}
+function closeWpBulkModal() { document.getElementById('wpBulkModalOverlay').classList.remove('open'); }
+
+async function applyWpBulkEdit() {
+  const rDate = document.getElementById('wpBulk_releaseDate').value;
+  const sDate = document.getElementById('wpBulk_shipDate').value;
+  const prefab = document.querySelector('input[name="wpBulk_prefab"]:checked').value;
+  const pulled = document.querySelector('input[name="wpBulk_pulled"]:checked').value;
+  const term = document.querySelector('input[name="wpBulk_terminated"]:checked').value;
+  const updates = {};
+  if (rDate) updates.release_date = rDate;
+  if (sDate) updates.ship_date = sDate;
+  if (prefab !== 'no-change') updates.prefab_done = prefab === 'true';
+  if (pulled !== 'no-change') updates.pulled = pulled === 'true';
+  if (term !== 'no-change') updates.terminated = term === 'true';
+  if (!Object.keys(updates).length) { closeWpBulkModal(); return; }
+  const ids = [...wpSelectedIds];
+  const { error } = await sb.from('wire_pulls').update(updates).in('id', ids);
+  if (error) { showToast('Error: ' + error.message, true); return; }
+  ids.forEach(id => {
+    const w = wirePulls.find(x => x.id === id);
+    if (w) {
+      if (updates.release_date !== undefined) w.releaseDate = updates.release_date;
+      if (updates.ship_date !== undefined) w.shipDate = updates.ship_date;
+      if (updates.prefab_done !== undefined) w.prefabDone = updates.prefab_done;
+      if (updates.pulled !== undefined) w.pulled = updates.pulled;
+      if (updates.terminated !== undefined) w.terminated = updates.terminated;
+    }
+  });
+  closeWpBulkModal(); clearWpSelection();
+  applyWpFilters(); updateWpStats();
+  showToast('✓ Updated ' + ids.length + ' panels');
+}
+
+async function bulkDeleteWp() {
+  if (!wpSelectedIds.size) return;
+  if (!confirm('Delete ' + wpSelectedIds.size + ' wire pulls?')) return;
+  const ids = [...wpSelectedIds];
+  await sb.from('wire_pulls').delete().in('id', ids);
+  wirePulls = wirePulls.filter(w => !wpSelectedIds.has(w.id));
+  wpSelectedIds.clear(); updateWpBulkToolbar();
+  applyWpFilters(); updateWpStats();
+  showToast('Deleted ' + ids.length + ' panels');
+}
 // ─── WIRE PULL CSV IMPORT ─────────────────────────────────────────
 let wpCsvHeaders = [], wpCsvRows = [];
 
