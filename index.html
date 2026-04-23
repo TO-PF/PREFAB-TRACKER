@@ -366,6 +366,11 @@
     <div style="margin-left:auto;font-family:var(--mono);font-size:11px;color:var(--text-dim);">
       Showing <span id="wp-showing-count">0</span> of <span id="wp-total-count">0</span>
     </div>
+    <label class="csv-input-label edit-only" style="padding:5px 14px;font-size:11px;">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+      Import CSV
+      <input type="file" id="wpCsvFile" accept=".csv,.txt">
+    </label>
     <button class="btn btn-primary edit-only" style="padding:5px 14px;font-size:11px;" onclick="openAddWpModal()">+ Add Panel</button>
   </div>
 
@@ -394,6 +399,19 @@
 </div><!-- end viewWirePulls -->
 
 </main>
+
+<!-- WIRE PULL CSV MAPPING MODAL -->
+<div class="modal-overlay" id="wpMapModalOverlay">
+  <div class="modal" style="width:560px;max-width:96vw;">
+    <button class="close-modal" onclick="document.getElementById('wpMapModalOverlay').classList.remove('open')">×</button>
+    <div class="modal-title">Map Wire Pull CSV</div>
+    <div id="wpMapModalBody"></div>
+    <div class="modal-actions">
+      <button class="btn btn-secondary" onclick="document.getElementById('wpMapModalOverlay').classList.remove('open')">Cancel</button>
+      <button class="btn btn-primary" onclick="confirmWpMapping()">Import Data</button>
+    </div>
+  </div>
+</div>
 
 <!-- ADD WIRE PULL MODAL -->
 <div class="modal-overlay" id="wpModalOverlay">
@@ -550,6 +568,7 @@ function enterApp() {
 
 // Restore session on page reload
 window.addEventListener('DOMContentLoaded', function() {
+  initWpCsvListener();
   const saved = sessionStorage.getItem('pf_editor');
   if (saved !== null) {
     isEditor = saved === '1';
@@ -1224,7 +1243,118 @@ async function deleteWp(id) {
   showToast('Wire pull deleted');
 }
 
-// ─── MISC ────────────────────────────────────────────────────────
+// ─── WIRE PULL CSV IMPORT ─────────────────────────────────────────
+let wpCsvHeaders = [], wpCsvRows = [];
+
+function initWpCsvListener() {
+  const wpCsvFile = document.getElementById('wpCsvFile');
+  if (!wpCsvFile) return;
+  wpCsvFile.addEventListener('change', function(e) {
+    const file = e.target.files[0]; if (!file) return;
+    const reader = new FileReader();
+    reader.onload = function(ev) {
+      let raw = ev.target.result.replace(/^\uFEFF/, '').replace(/\r\n/g, '\n').replace(/\r/g, '\n');
+      let lines = raw.split('\n');
+      const nonBlank = lines.find(l => l.replace(/,/g, '').trim());
+      const delim = detectDelimiter(nonBlank || lines[0]);
+      let hIdx = -1;
+      for (let i = 0; i < Math.min(8, lines.length); i++) {
+        const cols = parseCSVLine(lines[i], delim).map(c => c.replace(/^\uFEFF/, '').toLowerCase().replace(/[\s_]/g, ''));
+        if (cols.some(c => c.includes('panel') || c.includes('location') || c.includes('equip'))) { hIdx = i; break; }
+      }
+      if (hIdx === -1) hIdx = lines.findIndex(l => l.trim() && l.replace(/,/g, '').trim());
+      if (hIdx === -1) { showToast('Could not detect headers', true); return; }
+      wpCsvHeaders = parseCSVLine(lines[hIdx], delim).map(h => h.replace(/^"|"$/g, '').replace(/^\uFEFF/, '').trim());
+      wpCsvRows = [];
+      for (let i = hIdx + 1; i < lines.length; i++) {
+        const line = lines[i]; if (!line.trim() || !line.replace(/,/g, '').trim()) continue;
+        const cols = parseCSVLine(line, delim).map(c => c.replace(/^"|"$/g, '').trim());
+        if (cols.every(c => !c)) continue;
+        wpCsvRows.push(cols);
+      }
+      openWpMappingModal(delim);
+      e.target.value = '';
+    };
+    reader.readAsText(file);
+  });
+}
+
+function openWpMappingModal(delim) {
+  const fields = [
+    { key: 'panelId',     label: 'Panel ID',     required: true,  patterns: ['panelname','panel','name','equip','id'] },
+    { key: 'location',    label: 'Location',     required: false, patterns: ['location','lbs','level','area'] },
+    { key: 'releaseDate', label: 'Release Date', required: false, patterns: ['releasedate','release'] },
+    { key: 'shipDate',    label: 'Ship Date',    required: false, patterns: ['shipdate','shipped'] },
+    { key: 'pulled',      label: 'Pulled',       required: false, patterns: ['pulled','pull'] },
+    { key: 'terminated',  label: 'Terminated',   required: false, patterns: ['terminated','term'] },
+  ];
+  const optHtml = ['<option value="-1">— skip —</option>', ...wpCsvHeaders.map((h, i) => `<option value="${i}">${h}</option>`)].join('');
+  // Auto-map
+  const norm = wpCsvHeaders.map(h => h.toLowerCase().replace(/[\s_\-\.]/g, ''));
+  const autoMap = {};
+  fields.forEach(f => {
+    for (const p of f.patterns) { const i = norm.findIndex(h => h.includes(p)); if (i >= 0) { autoMap[f.key] = i; break; } }
+    if (autoMap[f.key] === undefined) autoMap[f.key] = -1;
+  });
+  document.getElementById('wpMapModalBody').innerHTML = `
+    <div style="font-family:var(--mono);font-size:11px;color:var(--text-dim);margin-bottom:16px;">
+      <strong style="color:var(--accent)">${wpCsvHeaders.length} columns</strong>, <strong style="color:var(--accent)">${wpCsvRows.length} rows</strong>
+      · delimiter: <strong style="color:var(--accent2)">${delim === '\t' ? 'TAB' : delim}</strong>
+      <br><br>Headers: <span style="color:var(--text)">${wpCsvHeaders.join(' | ')}</span>
+    </div>
+    <div class="form-grid">${fields.map(f => `
+      <div class="form-field">
+        <label class="form-label">${f.label}${f.required ? ' <span style="color:var(--accent2)">*</span>' : ''}</label>
+        <select class="form-input" id="wpmap_${f.key}">${optHtml}</select>
+      </div>`).join('')}</div>`;
+  fields.forEach(f => { const sel = document.getElementById('wpmap_' + f.key); if (sel && autoMap[f.key] >= 0) sel.value = autoMap[f.key]; });
+  document.getElementById('wpMapModalOverlay').classList.add('open');
+}
+
+async function confirmWpMapping() {
+  const getIdx = id => parseInt(document.getElementById(id)?.value ?? '-1');
+  const map = {
+    panelId:     getIdx('wpmap_panelId'),
+    location:    getIdx('wpmap_location'),
+    releaseDate: getIdx('wpmap_releaseDate'),
+    shipDate:    getIdx('wpmap_shipDate'),
+    pulled:      getIdx('wpmap_pulled'),
+    terminated:  getIdx('wpmap_terminated'),
+  };
+  if (map.panelId < 0) { showToast('Map Panel ID column', true); return; }
+
+  const existingIds = new Set(wirePulls.map(w => w.panelId.toLowerCase().trim()));
+  const toInsert = []; let skipped = 0;
+
+  wpCsvRows.forEach(cols => {
+    const get = idx => idx >= 0 && idx < cols.length ? cols[idx] : '';
+    const panelId = get(map.panelId);
+    if (!panelId || existingIds.has(panelId.toLowerCase().trim())) { skipped++; return; }
+    toInsert.push({
+      panel_id:     panelId,
+      location:     get(map.location),
+      release_date: get(map.releaseDate) || null,
+      ship_date:    get(map.shipDate) || null,
+      prefab_done:  false,
+      pulled:       get(map.pulled).toLowerCase() === 'true',
+      terminated:   get(map.terminated).toLowerCase() === 'true',
+      project_id:   currentProjectId
+    });
+  });
+
+  if (!toInsert.length) { showToast('No new rows to import (' + skipped + ' skipped)', false); document.getElementById('wpMapModalOverlay').classList.remove('open'); return; }
+
+  setSync('syncing', 'Importing ' + toInsert.length + ' panels...');
+  const BATCH = 100;
+  for (let i = 0; i < toInsert.length; i += BATCH) {
+    const { error } = await sb.from('wire_pulls').insert(toInsert.slice(i, i + BATCH));
+    if (error) { showToast('Import error: ' + error.message, true); setSync('error', 'Failed'); return; }
+  }
+  document.getElementById('wpMapModalOverlay').classList.remove('open');
+  await loadWirePulls();
+  setSync('connected', 'Live · All users synced');
+  showToast('✓ Imported ' + toInsert.length + ' panels · ' + skipped + ' skipped');
+}
 function sortTable(key) { if (sortKey === key) sortAsc = !sortAsc; else { sortKey = key; sortAsc = true; } renderTable(); }
 
 let toastTimer;
