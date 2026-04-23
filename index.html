@@ -1260,7 +1260,7 @@ function initWpCsvListener() {
       let hIdx = -1;
       for (let i = 0; i < Math.min(8, lines.length); i++) {
         const cols = parseCSVLine(lines[i], delim).map(c => c.replace(/^\uFEFF/, '').toLowerCase().replace(/[\s_]/g, ''));
-        if (cols.some(c => c.includes('panelname') || c.includes('panelid') || (c.includes('panel') && cols.some(d => d.includes('location'))))) { hIdx = i; break; }
+        if (cols.some(c => c.includes('evolve') || c.includes('evlbs') || c.includes('panelname') || c.includes('description'))) { hIdx = i; break; }
       }
       if (hIdx === -1) hIdx = lines.findIndex(l => l.trim() && l.replace(/,/g, '').trim());
       if (hIdx === -1) { showToast('Could not detect headers', true); return; }
@@ -1281,8 +1281,8 @@ function initWpCsvListener() {
 
 function openWpMappingModal(delim) {
   const fields = [
-    { key: 'panelId',     label: 'Panel ID',     required: true,  patterns: ['panelname','panelid','panel'] },
-    { key: 'location',    label: 'Location',     required: false, patterns: ['location','lbs','level'] },
+    { key: 'panelId',     label: 'Panel ID',     required: true,  patterns: ['evolvedescription','description','evolve','panelname','panelid','panel'] },
+    { key: 'location',    label: 'Location',     required: false, patterns: ['evlbsid','evlbs','lbsid','lbs','location','level'] },
     { key: 'releaseDate', label: 'Release Date', required: false, patterns: ['releasedate','release'] },
     { key: 'shipDate',    label: 'Ship Date',    required: false, patterns: ['shipdate','shipped'] },
     { key: 'pulled',      label: 'Pulled',       required: false, patterns: ['pulled','pull'] },
@@ -1323,13 +1323,12 @@ async function confirmWpMapping() {
   };
   if (map.panelId < 0) { showToast('Map Panel ID column', true); return; }
 
-  const existingIds = new Set(wirePulls.map(w => (w.panelId || '').toLowerCase().trim()));
-  const toInsert = []; let skipped = 0;
+  const toInsert = [];
 
   wpCsvRows.forEach(cols => {
     const get = idx => idx >= 0 && idx < cols.length ? cols[idx] : '';
     const panelId = get(map.panelId);
-    if (!panelId || existingIds.has(panelId.toLowerCase().trim())) { skipped++; return; }
+    if (!panelId) return;
     toInsert.push({
       panel_name:   panelId,
       location:     get(map.location),
@@ -1342,18 +1341,18 @@ async function confirmWpMapping() {
     });
   });
 
-  if (!toInsert.length) { showToast('No new rows to import (' + skipped + ' skipped)', false); document.getElementById('wpMapModalOverlay').classList.remove('open'); return; }
+  if (!toInsert.length) { showToast('No valid rows found', false); document.getElementById('wpMapModalOverlay').classList.remove('open'); return; }
 
   setSync('syncing', 'Importing ' + toInsert.length + ' panels...');
   const BATCH = 100;
   for (let i = 0; i < toInsert.length; i += BATCH) {
-    const { error } = await sb.from('wire_pulls').insert(toInsert.slice(i, i + BATCH));
+    const { error } = await sb.from('wire_pulls').upsert(toInsert.slice(i, i + BATCH), { onConflict: 'project_id,panel_name' });
     if (error) { showToast('Import error: ' + error.message, true); setSync('error', 'Failed'); return; }
   }
   document.getElementById('wpMapModalOverlay').classList.remove('open');
   await loadWirePulls();
   setSync('connected', 'Live · All users synced');
-  showToast('✓ Imported ' + toInsert.length + ' panels · ' + skipped + ' skipped');
+  showToast('✓ Imported ' + toInsert.length + ' panels');
 }
 function sortTable(key) { if (sortKey === key) sortAsc = !sortAsc; else { sortKey = key; sortAsc = true; } renderTable(); }
 
