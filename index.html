@@ -155,6 +155,11 @@
   body.editor .edit-only-block{display:block;}
   .editor-badge{font-family:var(--mono);font-size:10px;letter-spacing:1px;padding:4px 10px;background:rgba(201,79,26,0.15);color:var(--accent2);border:1px solid var(--accent2);}
 
+  /* INNER TABS */
+  .inner-tab{font-family:var(--mono);font-size:11px;letter-spacing:2px;text-transform:uppercase;padding:10px 20px;cursor:pointer;color:var(--text-dim);border-bottom:2px solid transparent;transition:all 0.2s;}
+  .inner-tab:hover{color:var(--accent);}
+  .inner-tab.active{color:var(--accent);border-bottom-color:var(--accent);}
+
   /* PROJECT TABS */
   .project-nav{display:flex;align-items:flex-end;gap:0;padding:0 32px;background:var(--surface2);border-bottom:2px solid var(--border);overflow-x:auto;min-height:42px;}
   .project-tab{font-family:var(--sans);font-weight:700;font-size:12px;letter-spacing:2px;text-transform:uppercase;padding:10px 20px;cursor:pointer;border:1px solid transparent;border-bottom:none;color:var(--text-dim);transition:all 0.2s;white-space:nowrap;position:relative;top:2px;background:transparent;display:flex;align-items:center;gap:8px;}
@@ -234,7 +239,17 @@
   <div class="project-tab-add" onclick="openProjectModal()">+ New Project</div>
 </div>
 
+<!-- INNER TABS -->
+<div style="background:var(--surface);border-bottom:1px solid var(--border);padding:0 32px;">
+  <div style="display:flex;gap:0;">
+    <div class="inner-tab active" id="innerTabAssemblies" onclick="switchInnerTab('assemblies')">📦 Assemblies</div>
+    <div class="inner-tab" id="innerTabWirePulls" onclick="switchInnerTab('wirepulls')">⚡ Wire Pulls</div>
+  </div>
+</div>
+
 <main>
+  <!-- ASSEMBLIES VIEW -->
+  <div id="viewAssemblies">
   <div class="stats-bar">
     <div class="stat-card" style="--accent-color:var(--accent)"><div class="label">Total Assemblies</div><div class="value" id="statTotal">0</div><div class="pct">ALL TRACKED</div></div>
     <div class="stat-card" style="--accent-color:var(--warning)"><div class="label">Released to Shop</div><div class="value" id="statReleased">0</div><div class="pct" id="statReleasedPct"></div></div>
@@ -317,7 +332,86 @@
       <div id="breakdownLBS"></div>
     </div>
   </div>
+</div><!-- end viewAssemblies -->
+
+<!-- WIRE PULLS VIEW -->
+<div id="viewWirePulls" style="display:none;">
+  <div class="stats-bar" style="margin-top:0;">
+    <div class="stat-card" style="--accent-color:var(--accent)"><div class="label">Total Panels</div><div class="value" id="wpStatTotal">0</div><div class="pct">ALL TRACKED</div></div>
+    <div class="stat-card" style="--accent-color:var(--warning)"><div class="label">Released</div><div class="value" id="wpStatReleased">0</div><div class="pct" id="wpStatReleasedPct"></div></div>
+    <div class="stat-card" style="--accent-color:#0a6aac"><div class="label">Prefab Done</div><div class="value" id="wpStatPrefab">0</div><div class="pct" id="wpStatPrefabPct"></div></div>
+    <div class="stat-card" style="--accent-color:#0a6aac"><div class="label">Shipped</div><div class="value" id="wpStatShipped">0</div><div class="pct" id="wpStatShippedPct"></div></div>
+    <div class="stat-card" style="--accent-color:var(--success)"><div class="label">Terminated</div><div class="value" id="wpStatTerminated">0</div><div class="pct" id="wpStatTerminatedPct"></div></div>
+  </div>
+
+  <div class="progress-wrap">
+    <div class="progress-title">Wire Pull Overview</div>
+    <div class="progress-rows">
+      <div class="progress-row"><div class="progress-label">Released</div><div class="progress-bar-wrap"><div class="progress-bar-fill" id="wpb-released" style="background:var(--warning);width:0%"></div></div><div class="progress-pct" id="wpp-released">0%</div></div>
+      <div class="progress-row"><div class="progress-label">Prefab Done</div><div class="progress-bar-wrap"><div class="progress-bar-fill" id="wpb-prefab" style="background:#0a6aac;width:0%"></div></div><div class="progress-pct" id="wpp-prefab">0%</div></div>
+      <div class="progress-row"><div class="progress-label">Shipped</div><div class="progress-bar-wrap"><div class="progress-bar-fill" id="wpb-shipped" style="background:#0a6aac;width:0%"></div></div><div class="progress-pct" id="wpp-shipped">0%</div></div>
+      <div class="progress-row"><div class="progress-label">Pulled</div><div class="progress-bar-wrap"><div class="progress-bar-fill" id="wpb-pulled" style="background:#7c3aed;width:0%"></div></div><div class="progress-pct" id="wpp-pulled">0%</div></div>
+      <div class="progress-row"><div class="progress-label">Terminated</div><div class="progress-bar-wrap"><div class="progress-bar-fill" id="wpb-terminated" style="background:var(--success);width:0%"></div></div><div class="progress-pct" id="wpp-terminated">0%</div></div>
+    </div>
+  </div>
+
+  <div class="filter-bar">
+    <div class="filter-label">Search</div>
+    <input class="filter-input" id="wpSearchInput" placeholder="Panel ID, Location..." oninput="applyWpFilters()" style="width:200px;">
+    <div class="filter-divider"></div>
+    <div class="filter-label">Location</div>
+    <select class="filter-select" id="wpFilterLocation" onchange="applyWpFilters()"><option value="">All</option></select>
+    <div class="filter-divider"></div>
+    <button class="btn btn-secondary" style="padding:5px 12px;font-size:11px;" onclick="clearWpFilters()">Clear</button>
+    <div style="margin-left:auto;font-family:var(--mono);font-size:11px;color:var(--text-dim);">
+      Showing <span id="wp-showing-count">0</span> of <span id="wp-total-count">0</span>
+    </div>
+    <button class="btn btn-primary edit-only" style="padding:5px 14px;font-size:11px;" onclick="openAddWpModal()">+ Add Panel</button>
+  </div>
+
+  <div class="table-wrap">
+    <div class="empty-state" id="wpEmptyState">
+      <div class="empty-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M13 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V9z"/><polyline points="13 2 13 9 20 9"/></svg></div>
+      <div class="empty-title">No Wire Pulls</div>
+      <div class="empty-sub">ADD PANELS MANUALLY OR IMPORT A CSV</div>
+    </div>
+    <table id="wpTable" style="display:none;">
+      <thead>
+        <tr>
+          <th onclick="sortWpTable('panel_id')">Panel ID <span class="sort-icon">▴</span></th>
+          <th onclick="sortWpTable('location')">Location <span class="sort-icon">▴</span></th>
+          <th onclick="sortWpTable('release_date')">Released <span class="sort-icon">▴</span></th>
+          <th style="text-align:center">Prefab Done</th>
+          <th onclick="sortWpTable('ship_date')">Ship Date <span class="sort-icon">▴</span></th>
+          <th style="text-align:center">Pulled</th>
+          <th style="text-align:center">Terminated</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody id="wpTableBody"></tbody>
+    </table>
+  </div>
+</div><!-- end viewWirePulls -->
+
 </main>
+
+<!-- ADD WIRE PULL MODAL -->
+<div class="modal-overlay" id="wpModalOverlay">
+  <div class="modal" style="width:480px;">
+    <button class="close-modal" onclick="closeWpModal()">×</button>
+    <div class="modal-title">Add Wire Pull</div>
+    <div class="form-grid">
+      <div class="form-field"><label class="form-label">Panel ID *</label><input class="form-input" id="wp_panelId" placeholder="e.g. EC2PP207B4"></div>
+      <div class="form-field"><label class="form-label">Location</label><input class="form-input" id="wp_location" placeholder="e.g. LEVEL 7 AREA 2"></div>
+      <div class="form-field"><label class="form-label">Release Date</label><input class="form-input" type="date" id="wp_releaseDate"></div>
+      <div class="form-field"><label class="form-label">Ship Date</label><input class="form-input" type="date" id="wp_shipDate"></div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-secondary" onclick="closeWpModal()">Cancel</button>
+      <button class="btn btn-primary" onclick="addWirePull()">Add Panel</button>
+    </div>
+  </div>
+</div>
 
 <!-- ADD MODAL -->
 <div class="modal-overlay" id="addModalOverlay">
@@ -420,6 +514,9 @@ let selectedIds = new Set();
 let sortKey = 'spool_id', sortAsc = true;
 let csvParsedHeaders = [], csvParsedRows = [];
 let lastSelectedIdx = -1;
+let currentInnerTab = 'assemblies';
+let wirePulls = [];
+let wpSortKey = 'panel_id', wpSortAsc = true;
 
 // ─── PIN ─────────────────────────────────────────────────────────
 let pinEntry = '';
@@ -569,6 +666,7 @@ async function loadAll() {
   if (error) throw error;
   assemblies = data.map(dbToLocal);
   render();
+  if (currentInnerTab === 'wirepulls') await loadWirePulls();
 }
 
 function dbToLocal(r) {
@@ -961,6 +1059,169 @@ function exportCSV() {
   const rows = assemblies.map(a => [a.spoolId, a.packageId, a.lbsId, a.releaseDate, a.prefabDone, a.shipDate, a.installed, a.sheetNumber].map(v => '"' + (v ?? '') + '"').join(','));
   const csv = [headers.join(','), ...rows].join('\n');
   const a = document.createElement('a'); a.href = 'data:text/csv;charset=utf-8,' + encodeURIComponent(csv); a.download = 'prefab_assemblies.csv'; a.click();
+}
+
+// ─── INNER TABS ──────────────────────────────────────────────────
+function switchInnerTab(tab) {
+  currentInnerTab = tab;
+  document.getElementById('innerTabAssemblies').classList.toggle('active', tab === 'assemblies');
+  document.getElementById('innerTabWirePulls').classList.toggle('active', tab === 'wirepulls');
+  document.getElementById('viewAssemblies').style.display = tab === 'assemblies' ? 'block' : 'none';
+  document.getElementById('viewWirePulls').style.display = tab === 'wirepulls' ? 'block' : 'none';
+  if (tab === 'wirepulls') loadWirePulls();
+}
+
+// ─── WIRE PULLS ──────────────────────────────────────────────────
+function dbToWp(r) {
+  return {
+    id: r.id, panelId: r.panel_id || '', location: r.location || '',
+    releaseDate: r.release_date || '', prefabDone: r.prefab_done || false,
+    shipDate: r.ship_date || '', pulled: r.pulled || false,
+    terminated: r.terminated || false, projectId: r.project_id || ''
+  };
+}
+
+async function loadWirePulls() {
+  let q = sb.from('wire_pulls').select('*').order('panel_id', { ascending: true });
+  if (currentProjectId) q = q.eq('project_id', currentProjectId);
+  const { data, error } = await q;
+  if (error) { console.error(error); return; }
+  wirePulls = data.map(dbToWp);
+  applyWpFilters();
+  updateWpStats();
+}
+
+function applyWpFilters() {
+  const search = document.getElementById('wpSearchInput').value.toLowerCase();
+  const loc = document.getElementById('wpFilterLocation').value;
+  let filtered = wirePulls.filter(w => {
+    if (search && !w.panelId.toLowerCase().includes(search) && !w.location.toLowerCase().includes(search)) return false;
+    if (loc && w.location !== loc) return false;
+    return true;
+  });
+  filtered.sort((a, b) => {
+    let av = a[wpSortKey] || '', bv = b[wpSortKey] || '';
+    if (av < bv) return wpSortAsc ? -1 : 1;
+    if (av > bv) return wpSortAsc ? 1 : -1;
+    return 0;
+  });
+  document.getElementById('wp-showing-count').textContent = filtered.length;
+  document.getElementById('wp-total-count').textContent = wirePulls.length;
+  // Update location dropdown
+  const locSel = document.getElementById('wpFilterLocation');
+  const locVal = locSel.value;
+  const locs = [...new Set(wirePulls.map(w => w.location).filter(Boolean))].sort();
+  locSel.innerHTML = '<option value="">All</option>' + locs.map(l => `<option value="${l}" ${l === locVal ? 'selected' : ''}>${l}</option>`).join('');
+  renderWpTable(filtered);
+}
+
+function renderWpTable(filtered) {
+  const tbody = document.getElementById('wpTableBody');
+  const empty = document.getElementById('wpEmptyState');
+  const table = document.getElementById('wpTable');
+  if (!filtered.length) { empty.style.display = 'block'; table.style.display = 'none'; return; }
+  empty.style.display = 'none'; table.style.display = 'table';
+  tbody.innerHTML = filtered.map(w => `
+    <tr>
+      <td style="font-family:var(--mono);font-size:12px;font-weight:600;">${w.panelId}</td>
+      <td style="font-size:12px;">${w.location || '<span style="color:var(--text-dim)">—</span>'}</td>
+      <td style="font-family:var(--mono);font-size:11px;">${w.releaseDate || '<span style="color:var(--text-dim)">—</span>'}</td>
+      <td style="text-align:center">
+        ${isEditor
+          ? `<div class="check-cell"><div class="check-box ${w.prefabDone ? 'checked' : ''}" onclick="toggleWpField('${w.id}','prefabDone',${!w.prefabDone})"></div></div>`
+          : `<div class="check-cell"><div class="check-box ${w.prefabDone ? 'checked' : ''}" style="cursor:default;opacity:0.7;"></div></div>`}
+      </td>
+      <td>
+        ${isEditor
+          ? `<input type="date" value="${w.shipDate || ''}" onchange="updateWpField('${w.id}','shipDate',this.value)" style="font-family:var(--mono);font-size:11px;background:transparent;border:none;color:${w.shipDate ? 'var(--text)' : 'var(--text-dim)'};cursor:pointer;outline:none;">`
+          : `<span style="font-family:var(--mono);font-size:11px;">${w.shipDate || '<span style="color:var(--text-dim)">—</span>'}</span>`}
+      </td>
+      <td style="text-align:center">
+        ${isEditor
+          ? `<div class="check-cell"><div class="check-box ${w.pulled ? 'checked' : ''}" onclick="toggleWpField('${w.id}','pulled',${!w.pulled})"></div></div>`
+          : `<div class="check-cell"><div class="check-box ${w.pulled ? 'checked' : ''}" style="cursor:default;opacity:0.7;"></div></div>`}
+      </td>
+      <td style="text-align:center">
+        ${isEditor
+          ? `<div class="check-cell"><div class="check-box ${w.terminated ? 'checked' : ''}" onclick="toggleWpField('${w.id}','terminated',${!w.terminated})"></div></div>`
+          : `<div class="check-cell"><div class="check-box ${w.terminated ? 'checked' : ''}" style="cursor:default;opacity:0.7;"></div></div>`}
+      </td>
+      <td>
+        ${isEditor ? `<button class="btn btn-danger" style="padding:3px 8px;font-size:10px;clip-path:none;" onclick="deleteWp('${w.id}')">✕</button>` : ''}
+      </td>
+    </tr>`).join('');
+}
+
+function updateWpStats() {
+  const total = wirePulls.length;
+  const released = wirePulls.filter(w => w.releaseDate).length;
+  const prefab = wirePulls.filter(w => w.prefabDone).length;
+  const shipped = wirePulls.filter(w => w.shipDate).length;
+  const pulled = wirePulls.filter(w => w.pulled).length;
+  const terminated = wirePulls.filter(w => w.terminated).length;
+  const pct = n => total ? Math.round(n / total * 100) + '%' : '0%';
+  document.getElementById('wpStatTotal').textContent = total;
+  document.getElementById('wpStatReleased').textContent = released;
+  document.getElementById('wpStatReleasedPct').textContent = pct(released);
+  document.getElementById('wpStatPrefab').textContent = prefab;
+  document.getElementById('wpStatPrefabPct').textContent = pct(prefab);
+  document.getElementById('wpStatShipped').textContent = shipped;
+  document.getElementById('wpStatShippedPct').textContent = pct(shipped);
+  document.getElementById('wpStatTerminated').textContent = terminated;
+  document.getElementById('wpStatTerminatedPct').textContent = pct(terminated);
+  const setBar = (id, val) => { document.getElementById('wpb-' + id).style.width = pct(val); document.getElementById('wpp-' + id).textContent = pct(val); };
+  setBar('released', released); setBar('prefab', prefab);
+  setBar('shipped', shipped); setBar('pulled', pulled); setBar('terminated', terminated);
+}
+
+async function toggleWpField(id, field, val) {
+  const w = wirePulls.find(x => x.id === id); if (!w) return;
+  w[field] = val;
+  applyWpFilters(); updateWpStats();
+  const col = field === 'prefabDone' ? 'prefab_done' : field;
+  await sb.from('wire_pulls').update({ [col]: val }).eq('id', id);
+}
+
+async function updateWpField(id, field, val) {
+  const w = wirePulls.find(x => x.id === id); if (!w) return;
+  w[field] = val;
+  applyWpFilters(); updateWpStats();
+  const col = field === 'shipDate' ? 'ship_date' : field === 'releaseDate' ? 'release_date' : field;
+  await sb.from('wire_pulls').update({ [col]: val || null }).eq('id', id);
+}
+
+function sortWpTable(key) { if (wpSortKey === key) wpSortAsc = !wpSortAsc; else { wpSortKey = key; wpSortAsc = true; } applyWpFilters(); }
+function clearWpFilters() { document.getElementById('wpSearchInput').value = ''; document.getElementById('wpFilterLocation').value = ''; applyWpFilters(); }
+
+function openAddWpModal() { document.getElementById('wpModalOverlay').classList.add('open'); }
+function closeWpModal() {
+  document.getElementById('wpModalOverlay').classList.remove('open');
+  ['wp_panelId', 'wp_location', 'wp_releaseDate', 'wp_shipDate'].forEach(id => { document.getElementById(id).value = ''; });
+}
+
+async function addWirePull() {
+  const panelId = document.getElementById('wp_panelId').value.trim();
+  if (!panelId) { showToast('Panel ID required', true); return; }
+  const row = {
+    panel_id: panelId, location: document.getElementById('wp_location').value.trim(),
+    release_date: document.getElementById('wp_releaseDate').value || null,
+    ship_date: document.getElementById('wp_shipDate').value || null,
+    prefab_done: false, pulled: false, terminated: false,
+    project_id: currentProjectId
+  };
+  const { data, error } = await sb.from('wire_pulls').insert(row).select();
+  if (error) { showToast('Error: ' + error.message, true); return; }
+  wirePulls.push(dbToWp(data[0]));
+  closeWpModal(); applyWpFilters(); updateWpStats();
+  showToast('✓ Panel added');
+}
+
+async function deleteWp(id) {
+  if (!confirm('Delete this wire pull?')) return;
+  wirePulls = wirePulls.filter(w => w.id !== id);
+  applyWpFilters(); updateWpStats();
+  await sb.from('wire_pulls').delete().eq('id', id);
+  showToast('Wire pull deleted');
 }
 
 // ─── MISC ────────────────────────────────────────────────────────
