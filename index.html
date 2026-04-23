@@ -160,6 +160,8 @@
   .project-tab{font-family:var(--sans);font-weight:700;font-size:12px;letter-spacing:2px;text-transform:uppercase;padding:10px 20px;cursor:pointer;border:1px solid transparent;border-bottom:none;color:var(--text-dim);transition:all 0.2s;white-space:nowrap;position:relative;top:2px;background:transparent;display:flex;align-items:center;gap:8px;}
   .project-tab:hover{color:var(--accent);}
   .project-tab.active{color:var(--accent);background:var(--surface);border-color:var(--border);border-bottom-color:var(--surface);}
+  .tab-delete{font-size:14px;line-height:1;color:var(--text-dim);cursor:pointer;padding:0 2px;margin-left:6px;opacity:0.5;transition:opacity 0.2s;}
+  .tab-delete:hover{opacity:1;color:var(--danger);}
   .project-tab-add{font-family:var(--mono);font-size:12px;padding:10px 14px;cursor:pointer;color:var(--text-dim);border:1px dashed transparent;transition:all 0.2s;white-space:nowrap;position:relative;top:2px;display:none;}
   .project-tab-add:hover{color:var(--accent);border-color:var(--accent);}
   body.editor .project-tab-add{display:block;}
@@ -222,6 +224,7 @@
       <input type="file" id="csvFile" accept=".csv,.txt">
     </label>
     <button class="btn btn-secondary edit-only" style="padding:7px 14px;font-size:11px;" onclick="exportCSV()">Export CSV</button>
+    <button class="btn btn-danger edit-only" id="deleteProjectBtn" style="padding:7px 14px;font-size:11px;display:none;" onclick="deleteCurrentProject()">Delete Project</button>
     <button class="btn btn-primary edit-only" style="padding:7px 14px;font-size:11px;" onclick="openAddModal()">+ Add Assembly</button>
   </div>
 </header>
@@ -501,12 +504,12 @@ function renderProjectTabs() {
   projects.forEach(p => {
     const tab = document.createElement('div');
     tab.className = 'project-tab' + (p.id === currentProjectId ? ' active' : '');
-    // Tab name + delete button (editor only)
-    tab.innerHTML = `<span onclick="switchProject('${p.id}')">${p.name}</span>`
-      + (isEditor ? `<span onclick="deleteProject('${p.id}','${p.name}')" style="margin-left:8px;opacity:0.4;font-size:10px;cursor:pointer;" title="Delete project">✕</span>` : '');
-    tab.querySelector('span').style.cursor = 'pointer';
+    tab.innerHTML = `<span onclick="switchProject('${p.id}')" style="cursor:pointer;">${p.name}</span>`;
     nav.insertBefore(tab, addBtn);
   });
+  // Update delete button visibility
+  const delBtn = document.getElementById('deleteProjectBtn');
+  if (delBtn) delBtn.style.display = isEditor && currentProjectId ? 'flex' : 'none';
 }
 
 async function switchProject(id) {
@@ -536,6 +539,11 @@ async function createProject() {
   closeProjectModal();
   await loadAll();
   showToast('✓ Project created: ' + name);
+}
+
+function deleteCurrentProject() {
+  const p = projects.find(x => x.id === currentProjectId);
+  if (p) deleteProject(p.id, p.name);
 }
 
 async function deleteProject(id, name) {
