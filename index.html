@@ -1093,7 +1093,7 @@ function switchInnerTab(tab) {
 // ─── WIRE PULLS ──────────────────────────────────────────────────
 function dbToWp(r) {
   return {
-    id: r.id, panelId: r.panel_id || '', location: r.location || '',
+    id: r.id, panelId: r.panel_name || '', location: r.location || '',
     releaseDate: r.release_date || '', prefabDone: r.prefab_done || false,
     shipDate: r.ship_date || '', pulled: r.pulled || false,
     terminated: r.terminated || false, projectId: r.project_id || ''
@@ -1222,7 +1222,7 @@ async function addWirePull() {
   const panelId = document.getElementById('wp_panelId').value.trim();
   if (!panelId) { showToast('Panel ID required', true); return; }
   const row = {
-    panel_id: panelId, location: document.getElementById('wp_location').value.trim(),
+    panel_name: panelId, location: document.getElementById('wp_location').value.trim(),
     release_date: document.getElementById('wp_releaseDate').value || null,
     ship_date: document.getElementById('wp_shipDate').value || null,
     prefab_done: false, pulled: false, terminated: false,
@@ -1323,7 +1323,7 @@ async function confirmWpMapping() {
   };
   if (map.panelId < 0) { showToast('Map Panel ID column', true); return; }
 
-  const existingIds = new Set(wirePulls.map(w => w.panelId.toLowerCase().trim()));
+  const existingIds = new Set(wirePulls.map(w => (w.panelId || '').toLowerCase().trim()));
   const toInsert = []; let skipped = 0;
 
   wpCsvRows.forEach(cols => {
@@ -1331,7 +1331,7 @@ async function confirmWpMapping() {
     const panelId = get(map.panelId);
     if (!panelId || existingIds.has(panelId.toLowerCase().trim())) { skipped++; return; }
     toInsert.push({
-      panel_id:     panelId,
+      panel_name:   panelId,
       location:     get(map.location),
       release_date: get(map.releaseDate) || null,
       ship_date:    get(map.shipDate) || null,
