@@ -154,6 +154,15 @@
   body.editor .edit-only{display:flex;}
   body.editor .edit-only-block{display:block;}
   .editor-badge{font-family:var(--mono);font-size:10px;letter-spacing:1px;padding:4px 10px;background:rgba(201,79,26,0.15);color:var(--accent2);border:1px solid var(--accent2);}
+
+  /* PROJECT TABS */
+  .project-nav{display:flex;align-items:flex-end;gap:0;padding:0 32px;background:var(--surface2);border-bottom:2px solid var(--border);overflow-x:auto;min-height:42px;}
+  .project-tab{font-family:var(--sans);font-weight:700;font-size:12px;letter-spacing:2px;text-transform:uppercase;padding:10px 20px;cursor:pointer;border:1px solid transparent;border-bottom:none;color:var(--text-dim);transition:all 0.2s;white-space:nowrap;position:relative;top:2px;background:transparent;display:flex;align-items:center;gap:8px;}
+  .project-tab:hover{color:var(--accent);}
+  .project-tab.active{color:var(--accent);background:var(--surface);border-color:var(--border);border-bottom-color:var(--surface);}
+  .project-tab-add{font-family:var(--mono);font-size:12px;padding:10px 14px;cursor:pointer;color:var(--text-dim);border:1px dashed transparent;transition:all 0.2s;white-space:nowrap;position:relative;top:2px;display:none;}
+  .project-tab-add:hover{color:var(--accent);border-color:var(--accent);}
+  body.editor .project-tab-add{display:block;}
 </style>
 </head>
 <body>
@@ -216,6 +225,11 @@
     <button class="btn btn-primary edit-only" style="padding:7px 14px;font-size:11px;" onclick="openAddModal()">+ Add Assembly</button>
   </div>
 </header>
+
+<!-- PROJECT TABS -->
+<div class="project-nav" id="projectNav">
+  <div class="project-tab-add" onclick="openProjectModal()">+ New Project</div>
+</div>
 
 <main>
   <div class="stats-bar">
@@ -288,34 +302,6 @@
       </thead>
       <tbody id="tableBody"></tbody>
     </table>
-  </div>
-
-  <!-- PDF DRAWINGS SECTION - editor only -->
-  <div class="sheet-manager edit-only-block" id="sheetManager" style="display:none;">
-    <div class="sheet-manager-header" onclick="toggleSheetManager()">
-      <h3>📄 Drawing PDFs <span id="sheetCount" style="color:var(--text-dim);font-weight:400;font-size:11px;"></span></h3>
-      <span id="sheetManagerToggle" style="font-family:var(--mono);font-size:11px;color:var(--text-dim);">▼ Show</span>
-    </div>
-    <div class="sheet-manager-body" id="sheetManagerBody">
-      <div style="font-family:var(--mono);font-size:10px;color:var(--text-dim);margin-bottom:16px;line-height:1.8;">
-        Upload PDFs named by sheet number — e.g. <strong style="color:var(--accent)">G7-303.pdf</strong>, <strong style="color:var(--accent)">JB-7S801.pdf</strong><br>
-        Filename must match the sheet number exactly. Drawing links auto-populate for all matching assemblies.
-      </div>
-      <div class="pdf-drop-zone" id="drawingDropZone"
-           ondragover="event.preventDefault();this.classList.add('drag-over')"
-           ondragleave="this.classList.remove('drag-over')"
-           ondrop="handleDrawingDrop(event)">
-        <div class="pdf-drop-title">DRAG & DROP PDFs HERE</div>
-        <div class="pdf-drop-sub">Name files by sheet number: G7-303.pdf, JB-7S801.pdf</div>
-        <input type="file" id="drawingFileInput" accept=".pdf" multiple style="display:none" onchange="handleDrawingFiles(this.files)">
-        <button class="btn btn-primary" onclick="document.getElementById('drawingFileInput').click();event.stopPropagation()">Select PDFs</button>
-      </div>
-      <div class="upload-progress" id="drawingUploadProgress">
-        <div class="upload-progress-label" id="drawingProgressLabel">Uploading...</div>
-        <div class="upload-progress-bar-wrap"><div class="upload-progress-bar" id="drawingProgressBar"></div></div>
-      </div>
-      <div id="drawingTableWrap"><div class="sheet-empty">No drawings uploaded yet — drag and drop PDFs above</div></div>
-    </div>
   </div>
 
   <div class="breakdown-section">
@@ -396,6 +382,22 @@
   </div>
 </div>
 
+<!-- NEW PROJECT MODAL -->
+<div class="modal-overlay" id="projectModalOverlay">
+  <div class="modal" style="width:440px;">
+    <button class="close-modal" onclick="closeProjectModal()">×</button>
+    <div class="modal-title">New Project</div>
+    <div class="form-grid">
+      <div class="form-field full"><label class="form-label">Project Name *</label><input class="form-input" id="proj_name" placeholder="e.g. Jefferson Hospital"></div>
+      <div class="form-field full"><label class="form-label">Description</label><input class="form-input" id="proj_desc" placeholder="Optional description"></div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-secondary" onclick="closeProjectModal()">Cancel</button>
+      <button class="btn btn-primary" onclick="createProject()">Create Project</button>
+    </div>
+  </div>
+</div>
+
 <div class="toast" id="toast"></div>
 
 <script>
@@ -407,13 +409,14 @@ const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
 // ─── STATE ───────────────────────────────────────────────────────
 let isEditor = false;
+let projects = [];
+let currentProjectId = null;
 let assemblies = [];
 let filteredRows = [];
 let selectedIds = new Set();
 let sortKey = 'spool_id', sortAsc = true;
 let csvParsedHeaders = [], csvParsedRows = [];
 let lastSelectedIdx = -1;
-let uploadedDrawings = [];
 
 // ─── PIN ─────────────────────────────────────────────────────────
 let pinEntry = '';
@@ -440,7 +443,6 @@ function enterApp() {
   if (isEditor) {
     document.body.classList.add('editor');
     document.getElementById('editorBadge').style.display = 'flex';
-    document.getElementById('sheetManager').style.display = 'block';
   }
   sessionStorage.setItem('pf_editor', isEditor ? '1' : '0');
   startApp();
@@ -455,7 +457,6 @@ window.addEventListener('DOMContentLoaded', function() {
     if (isEditor) {
       document.body.classList.add('editor');
       document.getElementById('editorBadge').style.display = 'flex';
-      document.getElementById('sheetManager').style.display = 'block';
     }
     startApp();
   }
@@ -466,13 +467,13 @@ async function startApp() {
   document.getElementById('loadingOverlay').style.display = 'flex';
   setSync('syncing', 'Connecting...');
   try {
+    await loadProjects();
+    if (!currentProjectId && projects.length > 0) currentProjectId = projects[0].id;
+    renderProjectTabs();
     await loadAll();
     setSync('connected', 'Live · All users synced');
-    // Realtime subscription
     sb.channel('db-changes')
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'assemblies' }, async () => {
-        await loadAll();
-      })
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'assemblies' }, async () => { await loadAll(); })
       .subscribe();
   } catch(e) {
     console.error('Connection error:', e);
@@ -487,12 +488,78 @@ function setSync(state, text) {
   document.getElementById('syncText').textContent = text;
 }
 
+// ─── PROJECTS ────────────────────────────────────────────────────
+async function loadProjects() {
+  const { data, error } = await sb.from('projects').select('*').order('created_at');
+  if (!error && data) projects = data;
+}
+
+function renderProjectTabs() {
+  const nav = document.getElementById('projectNav');
+  const addBtn = nav.querySelector('.project-tab-add');
+  nav.querySelectorAll('.project-tab').forEach(t => t.remove());
+  projects.forEach(p => {
+    const tab = document.createElement('div');
+    tab.className = 'project-tab' + (p.id === currentProjectId ? ' active' : '');
+    // Tab name + delete button (editor only)
+    tab.innerHTML = `<span onclick="switchProject('${p.id}')">${p.name}</span>`
+      + (isEditor ? `<span onclick="deleteProject('${p.id}','${p.name}')" style="margin-left:8px;opacity:0.4;font-size:10px;cursor:pointer;" title="Delete project">✕</span>` : '');
+    tab.querySelector('span').style.cursor = 'pointer';
+    nav.insertBefore(tab, addBtn);
+  });
+}
+
+async function switchProject(id) {
+  currentProjectId = id;
+  renderProjectTabs();
+  document.getElementById('loadingOverlay').style.display = 'flex';
+  await loadAll();
+  document.getElementById('loadingOverlay').style.display = 'none';
+}
+
+function openProjectModal() { document.getElementById('projectModalOverlay').classList.add('open'); }
+function closeProjectModal() {
+  document.getElementById('projectModalOverlay').classList.remove('open');
+  document.getElementById('proj_name').value = '';
+  document.getElementById('proj_desc').value = '';
+}
+
+async function createProject() {
+  const name = document.getElementById('proj_name').value.trim();
+  if (!name) { showToast('Project name required', true); return; }
+  const desc = document.getElementById('proj_desc').value.trim();
+  const { data, error } = await sb.from('projects').insert({ name, description: desc, color: '#0a4a7c' }).select();
+  if (error) { showToast('Failed: ' + error.message, true); return; }
+  await loadProjects();
+  currentProjectId = data[0].id;
+  renderProjectTabs();
+  closeProjectModal();
+  await loadAll();
+  showToast('✓ Project created: ' + name);
+}
+
+async function deleteProject(id, name) {
+  if (!confirm(`Delete project "${name}"?\n\nThis will also delete ALL assemblies in this project. This cannot be undone.`)) return;
+  // Delete all assemblies for this project first
+  await sb.from('assemblies').delete().eq('project_id', id);
+  // Delete the project
+  const { error } = await sb.from('projects').delete().eq('id', id);
+  if (error) { showToast('Failed: ' + error.message, true); return; }
+  await loadProjects();
+  // Switch to first remaining project
+  currentProjectId = projects.length > 0 ? projects[0].id : null;
+  renderProjectTabs();
+  await loadAll();
+  showToast('Project deleted');
+}
+
 // ─── LOAD DATA ───────────────────────────────────────────────────
 async function loadAll() {
-  const { data, error } = await sb.from('assemblies').select('*').order('created_at', { ascending: true });
+  let query = sb.from('assemblies').select('*').order('created_at', { ascending: true });
+  if (currentProjectId) query = query.eq('project_id', currentProjectId);
+  const { data, error } = await query;
   if (error) throw error;
   assemblies = data.map(dbToLocal);
-  loadDrawings();
   render();
 }
 
@@ -702,7 +769,8 @@ async function addRow() {
     spool_id: spoolId, package_id: document.getElementById('f_packageId').value.trim(),
     lbs_id: document.getElementById('f_lbsId').value.trim(), sheet_number: document.getElementById('f_sheetNumber').value.trim(),
     release_date: document.getElementById('f_releaseDate').value || null, ship_date: document.getElementById('f_shipDate').value || null,
-    prefab_done: false, installed: false, drawing_url: ''
+    prefab_done: false, installed: false, drawing_url: '',
+    project_id: currentProjectId || 'CHOP-NPT'
   };
   const { data, error } = await sb.from('assemblies').insert(row).select();
   if (error) { showToast('Error: ' + error.message, true); return; }
@@ -863,7 +931,8 @@ async function confirmMapping() {
       spool_id: spoolId, package_id: get(map.packageId), lbs_id: get(map.lbsId),
       release_date: get(map.releaseDate) || null, prefab_done: get(map.prefabDone).toLowerCase() === 'true',
       ship_date: get(map.shipDate) || null, installed: get(map.installed).toLowerCase() === 'true',
-      sheet_number: get(map.sheetNumber), drawing_url: ''
+      sheet_number: get(map.sheetNumber), drawing_url: '',
+      project_id: currentProjectId || 'CHOP-NPT'
     });
   });
   if (!toInsert.length) { showToast('No new rows to import (' + skipped + ' skipped)', false); document.getElementById('mapModalOverlay').classList.remove('open'); return; }
@@ -884,106 +953,6 @@ function exportCSV() {
   const rows = assemblies.map(a => [a.spoolId, a.packageId, a.lbsId, a.releaseDate, a.prefabDone, a.shipDate, a.installed, a.sheetNumber].map(v => '"' + (v ?? '') + '"').join(','));
   const csv = [headers.join(','), ...rows].join('\n');
   const a = document.createElement('a'); a.href = 'data:text/csv;charset=utf-8,' + encodeURIComponent(csv); a.download = 'prefab_assemblies.csv'; a.click();
-}
-
-// ─── PDF DRAWINGS ────────────────────────────────────────────────
-function loadDrawings() {
-  uploadedDrawings = [];
-  const seen = new Set();
-  assemblies.forEach(a => {
-    if (a.sheetNumber && a.drawingUrl && !seen.has(a.sheetNumber)) {
-      seen.add(a.sheetNumber);
-      uploadedDrawings.push({ sheetNumber: a.sheetNumber, url: a.drawingUrl });
-    }
-  });
-  renderDrawingTable();
-}
-
-function toggleSheetManager() {
-  const body = document.getElementById('sheetManagerBody');
-  const toggle = document.getElementById('sheetManagerToggle');
-  const open = body.classList.toggle('open');
-  toggle.textContent = open ? '▲ Hide' : '▼ Show';
-}
-
-function renderDrawingTable() {
-  const wrap = document.getElementById('drawingTableWrap');
-  const count = document.getElementById('sheetCount');
-  count.textContent = uploadedDrawings.length ? '(' + uploadedDrawings.length + ' drawings)' : '';
-  if (!uploadedDrawings.length) { wrap.innerHTML = '<div class="sheet-empty">No drawings uploaded yet</div>'; return; }
-  wrap.innerHTML = `<table class="sheet-table">
-    <thead><tr><th>Sheet Number</th><th>File</th><th>Link</th><th>Action</th></tr></thead>
-    <tbody>${uploadedDrawings.map(d => `<tr>
-      <td>${d.sheetNumber}</td>
-      <td style="font-family:var(--mono);font-size:10px;">${d.sheetNumber}.pdf</td>
-      <td><a href="${d.url}" target="_blank" style="color:var(--accent);font-size:10px;">📄 Open</a></td>
-      <td><button class="btn btn-danger" style="padding:3px 8px;font-size:10px;clip-path:none;" onclick="deleteDrawing('${d.sheetNumber}')">✕</button></td>
-    </tr>`).join('')}</tbody></table>`;
-}
-
-function handleDrawingDrop(e) {
-  e.preventDefault();
-  document.getElementById('drawingDropZone').classList.remove('drag-over');
-  handleDrawingFiles(e.dataTransfer.files);
-}
-
-async function handleDrawingFiles(files) {
-  const pdfs = Array.from(files).filter(f => f.name.toLowerCase().endsWith('.pdf'));
-  if (!pdfs.length) { showToast('No PDF files found', true); return; }
-
-  const progressWrap = document.getElementById('drawingUploadProgress');
-  const progressBar = document.getElementById('drawingProgressBar');
-  const progressLabel = document.getElementById('drawingProgressLabel');
-  progressWrap.style.display = 'block';
-
-  let uploaded = 0, failed = 0;
-
-  for (let i = 0; i < pdfs.length; i++) {
-    const file = pdfs[i];
-    const sheetNumber = file.name.replace(/\.pdf$/i, '').trim();
-    progressLabel.textContent = `Uploading ${i + 1} of ${pdfs.length}: ${file.name}`;
-    progressBar.style.width = Math.round((i / pdfs.length) * 100) + '%';
-
-    try {
-      const path = sheetNumber + '.pdf';
-      const { error: upErr } = await sb.storage.from('drawings').upload(path, file, {
-        cacheControl: '3600', upsert: true, contentType: 'application/pdf'
-      });
-      if (upErr) { console.error('Upload error:', upErr); failed++; continue; }
-
-      const { data: urlData } = sb.storage.from('drawings').getPublicUrl(path);
-      const url = urlData.publicUrl;
-
-      // Update all assemblies with this sheet number
-      await sb.from('assemblies').update({ drawing_url: url }).eq('sheet_number', sheetNumber);
-
-      // Update local state
-      assemblies.forEach(a => { if (a.sheetNumber === sheetNumber) a.drawingUrl = url; });
-      const ex = uploadedDrawings.findIndex(d => d.sheetNumber === sheetNumber);
-      if (ex >= 0) uploadedDrawings[ex].url = url;
-      else uploadedDrawings.push({ sheetNumber, url });
-      uploaded++;
-    } catch(e) { console.error('Exception:', e); failed++; }
-  }
-
-  progressBar.style.width = '100%';
-  setTimeout(() => { progressWrap.style.display = 'none'; progressBar.style.width = '0%'; }, 1000);
-
-  renderDrawingTable();
-  renderTable();
-  showToast(failed > 0 ? `✓ ${uploaded} uploaded · ${failed} failed` : `✓ ${uploaded} PDFs uploaded`, failed > 0);
-
-  const body = document.getElementById('sheetManagerBody');
-  if (body && !body.classList.contains('open')) toggleSheetManager();
-}
-
-async function deleteDrawing(sheetNumber) {
-  if (!confirm('Remove drawing for ' + sheetNumber + '?')) return;
-  await sb.storage.from('drawings').remove([sheetNumber + '.pdf']);
-  await sb.from('assemblies').update({ drawing_url: null }).eq('sheet_number', sheetNumber);
-  uploadedDrawings = uploadedDrawings.filter(d => d.sheetNumber !== sheetNumber);
-  assemblies.forEach(a => { if (a.sheetNumber === sheetNumber) a.drawingUrl = ''; });
-  renderDrawingTable(); renderTable(); showToast('Drawing removed');
 }
 
 // ─── MISC ────────────────────────────────────────────────────────
