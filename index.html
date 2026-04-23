@@ -693,7 +693,7 @@ function enterApp() {
   sessionStorage.setItem('pf_editor', isEditor ? '1' : '0');
   init();
 }
-// Check session
+// Check session — run immediately since DOM is already ready
 if (sessionStorage.getItem('pf_editor') !== null) {
   isEditor = sessionStorage.getItem('pf_editor') === '1';
   document.getElementById('pinOverlay').style.display = 'none';
@@ -703,7 +703,7 @@ if (sessionStorage.getItem('pf_editor') !== null) {
     document.getElementById('sheetManager').style.display = 'block';
     document.getElementById('wpPdfSection').style.display = 'block';
   }
-  window.addEventListener('DOMContentLoaded', init);
+  setTimeout(init, 0);
 }
 
 // ─── INIT ────────────────────────────────────────────────────────
@@ -1397,37 +1397,69 @@ async function handleWpFiles(files) {
 }
 
 async function uploadPdfs(pdfs, bucket, onSuccess, progressId, barId, labelId) {
-  const progressWrap=document.getElementById(progressId);
-  const progressBar=document.getElementById(barId);
-  const progressLabel=document.getElementById(labelId);
-  progressWrap.style.display='block';
-  let uploaded=0,failed=0;
-  for(let i=0;i<pdfs.length;i++){
-    const file=pdfs[i];
-    const name=file.name.replace(/\.pdf$/i,'').trim();
-    progressLabel.textContent=`Uploading ${i+1} of ${pdfs.length}: ${file.name}`;
-    progressBar.style.width=Math.round((i/pdfs.length)*100)+'%';
+  const progressWrap = document.getElementById(progressId);
+  const progressBar  = document.getElementById(barId);
+  const progressLabel = document.getElementById(labelId);
+  if (progressWrap) progressWrap.style.display = 'block';
+  let uploaded = 0, failed = 0;
+
+  for (let i = 0; i < pdfs.length; i++) {
+    const file = pdfs[i];
+    // Strip .pdf extension to get the name (sheet number or panel name)
+    const name = file.name.replace(/\.pdf$/i, '').trim();
+
+    if (progressLabel) progressLabel.textContent = `Uploading ${i+1} of ${pdfs.length}: ${file.name}`;
+    if (progressBar) progressBar.style.width = Math.round((i / pdfs.length) * 100) + '%';
+
     try {
-      const path=`${currentProjectId}/${name}.pdf`;
-      const {error}=await sb.storage.from(bucket).upload(path,file,{cacheControl:'3600',upsert:true,contentType:'application/pdf'});
-      if(error){failed++;continue;}
-      const {data:urlData}=sb.storage.from(bucket).getPublicUrl(path);
-      await onSuccess(name,urlData.publicUrl);
+      // Use flat path — no subfolders to avoid bucket config issues
+      const path = `${currentProjectId}_${name}.pdf`;
+      const { error } = await sb.storage.from(bucket).upload(path, file, {
+        cacheControl: '3600',
+        upsert: true,
+        contentType: 'application/pdf'
+      });
+
+      if (error) {
+        console.error('Storage upload error:', error.message, error);
+        failed++;
+        continue;
+      }
+
+      const { data: urlData } = sb.storage.from(bucket).getPublicUrl(path);
+      await onSuccess(name, urlData.publicUrl);
       uploaded++;
-    } catch(e){failed++;console.error(e);}
+
+    } catch(e) {
+      console.error('Upload exception:', e);
+      failed++;
+    }
   }
-  progressBar.style.width='100%';
-  setTimeout(()=>{progressWrap.style.display='none';progressBar.style.width='0%';},1000);
-  showToast(failed>0?`✓ ${uploaded} uploaded · ${failed} failed`:`✓ ${uploaded} PDFs uploaded`,failed>0);
-  if(!document.getElementById(progressId.replace('Progress','Body')||'sheetManagerBody').classList.contains('open')) {
-    if(bucket==='drawings') toggleSheetManager();
-    else toggleWpPdfSection();
-  }
+
+  if (progressBar) progressBar.style.width = '100%';
+  setTimeout(() => {
+    if (progressWrap) { progressWrap.style.display = 'none'; }
+    if (progressBar) progressBar.style.width = '0%';
+  }, 1000);
+
+  const isError = failed > 0;
+  showToast(isError ? `✓ ${uploaded} uploaded · ${failed} failed` : `✓ ${uploaded} PDFs uploaded`, isError);
+
+  // Auto-open the relevant section
+  try {
+    if (bucket === 'drawings') {
+      const body = document.getElementById('sheetManagerBody');
+      if (body && !body.classList.contains('open')) toggleSheetManager();
+    } else {
+      const body = document.getElementById('wpPdfBody');
+      if (body && !body.classList.contains('open')) toggleWpPdfSection();
+    }
+  } catch(e) { /* ignore toggle errors */ }
 }
 
 async function deleteDrawing(sheetNumber) {
   if(!confirm('Remove drawing for '+sheetNumber+'?'))return;
-  await sb.storage.from('drawings').remove([currentProjectId+'/'+sheetNumber+'.pdf']);
+  await sb.storage.from('drawings').remove([currentProjectId+'_'+sheetNumber+'.pdf']);
   await sb.from('assemblies').update({drawing_url:null}).eq('sheet_number',sheetNumber).eq('project_id',currentProjectId);
   uploadedDrawings=uploadedDrawings.filter(d=>d.sheetNumber!==sheetNumber);
   assemblies.forEach(a=>{if(a.sheetNumber===sheetNumber)a.drawingUrl='';});
