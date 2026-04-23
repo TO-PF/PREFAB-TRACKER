@@ -1174,7 +1174,6 @@ function renderWpTable(filtered) {
 function updateWpStats() {
   const total = wirePulls.length;
   const released = wirePulls.filter(w => w.releaseDate).length;
-  const prefab = wirePulls.filter(w => w.prefabDone).length;
   const shipped = wirePulls.filter(w => w.shipDate).length;
   const pulled = wirePulls.filter(w => w.pulled).length;
   const terminated = wirePulls.filter(w => w.terminated).length;
@@ -1182,8 +1181,6 @@ function updateWpStats() {
   document.getElementById('wpStatTotal').textContent = total;
   document.getElementById('wpStatReleased').textContent = released;
   document.getElementById('wpStatReleasedPct').textContent = pct(released);
-  document.getElementById('wpStatPrefab').textContent = prefab;
-  document.getElementById('wpStatPrefabPct').textContent = pct(prefab);
   document.getElementById('wpStatShipped').textContent = shipped;
   document.getElementById('wpStatShippedPct').textContent = pct(shipped);
   document.getElementById('wpStatPulled').textContent = pulled;
@@ -1191,8 +1188,8 @@ function updateWpStats() {
   document.getElementById('wpStatTerminated').textContent = terminated;
   document.getElementById('wpStatTerminatedPct').textContent = pct(terminated);
   const setBar = (id, val) => { document.getElementById('wpb-' + id).style.width = pct(val); document.getElementById('wpp-' + id).textContent = pct(val); };
-  setBar('released', released); setBar('prefab', prefab);
-  setBar('shipped', shipped); setBar('pulled', pulled); setBar('terminated', terminated);
+  const prefab = wirePulls.filter(w => w.prefabDone).length;
+  setBar('released', released); setBar('prefab', prefab); setBar('shipped', shipped); setBar('pulled', pulled); setBar('terminated', terminated);
 }
 
 async function toggleWpField(id, field, val) {
