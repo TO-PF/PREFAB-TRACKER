@@ -16,9 +16,7 @@
   *{box-sizing:border-box;margin:0;padding:0;}
   body{background:var(--bg);color:var(--text);font-family:var(--body);min-height:100vh;overflow-x:hidden;}
   body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(rgba(10,74,124,0.05) 1px,transparent 1px),linear-gradient(90deg,rgba(10,74,124,0.05) 1px,transparent 1px);background-size:40px 40px;pointer-events:none;z-index:0;}
-
-  /* HEADER */
-  header{position:relative;z-index:10;background:linear-gradient(180deg,#dce6f0 0%,transparent 100%);border-bottom:1px solid var(--border);padding:16px 32px;display:flex;align-items:center;justify-content:space-between;gap:24px;}
+  header{position:relative;z-index:10;background:linear-gradient(180deg,#dce6f0 0%,transparent 100%);border-bottom:1px solid var(--border);padding:20px 32px;display:flex;align-items:center;justify-content:space-between;gap:24px;}
   .logo-block{display:flex;align-items:center;gap:16px;}
   .logo-icon{width:44px;height:44px;border:2px solid var(--accent);display:grid;place-items:center;clip-path:polygon(8px 0%,100% 0%,100% calc(100% - 8px),calc(100% - 8px) 100%,0% 100%,0% 8px);background:rgba(0,200,255,0.08);}
   .logo-icon svg{width:22px;height:22px;color:var(--accent);}
@@ -33,8 +31,6 @@
   .sync-status.error .sync-dot{background:var(--danger);}
   .sync-status.error{color:var(--danger);border-color:rgba(255,71,87,0.3);}
   @keyframes pulse{0%,100%{opacity:1;}50%{opacity:0.3;}}
-
-  /* BUTTONS */
   .btn{font-family:var(--sans);font-weight:600;font-size:13px;letter-spacing:2px;text-transform:uppercase;padding:9px 20px;border:none;cursor:pointer;transition:all 0.2s;clip-path:polygon(6px 0%,100% 0%,calc(100% - 6px) 100%,0% 100%);}
   .btn-primary{background:var(--accent);color:#fff;}
   .btn-primary:hover{background:#1a6aac;transform:translateY(-1px);}
@@ -42,38 +38,18 @@
   .btn-secondary:hover{background:rgba(10,74,124,0.1);}
   .btn-danger{background:var(--danger);color:#fff;}
   .btn-danger:hover{background:#e0203a;}
-  .btn-success{background:var(--success);color:#fff;}
   .btn:disabled{opacity:0.4;cursor:not-allowed;transform:none!important;}
   .csv-input-label{display:flex;align-items:center;gap:8px;font-family:var(--sans);font-weight:600;font-size:13px;letter-spacing:2px;text-transform:uppercase;padding:9px 20px;border:1px dashed var(--border);color:var(--text-dim);cursor:pointer;transition:all 0.2s;}
   .csv-input-label:hover{border-color:var(--accent);color:var(--accent);}
   #csvFile{display:none;}
-
-  main{position:relative;z-index:1;padding:24px 32px;max-width:1700px;margin:0 auto;}
-
-  /* PROJECT TABS */
-  .project-nav{display:flex;align-items:center;gap:0;margin-bottom:0;border-bottom:2px solid var(--border);overflow-x:auto;}
-  .project-tab{font-family:var(--sans);font-weight:700;font-size:13px;letter-spacing:2px;text-transform:uppercase;padding:10px 20px;cursor:pointer;border:1px solid transparent;border-bottom:none;color:var(--text-dim);transition:all 0.2s;white-space:nowrap;position:relative;top:2px;}
-  .project-tab:hover{color:var(--accent);background:rgba(10,74,124,0.05);}
-  .project-tab.active{color:var(--accent);background:var(--surface);border-color:var(--border);border-bottom-color:var(--surface);}
-  .project-tab-add{font-family:var(--mono);font-size:14px;padding:10px 16px;cursor:pointer;color:var(--text-dim);border:1px dashed transparent;transition:all 0.2s;white-space:nowrap;position:relative;top:2px;}
-  .project-tab-add:hover{color:var(--accent);border-color:var(--accent);}
-
-  /* INNER TABS (Assemblies / Wire Pulls) */
-  .inner-nav{display:flex;gap:0;margin-bottom:20px;border-bottom:1px solid var(--border);}
-  .inner-tab{font-family:var(--mono);font-size:11px;letter-spacing:2px;text-transform:uppercase;padding:8px 20px;cursor:pointer;color:var(--text-dim);border-bottom:2px solid transparent;transition:all 0.2s;}
-  .inner-tab:hover{color:var(--accent);}
-  .inner-tab.active{color:var(--accent);border-bottom-color:var(--accent);}
-
-  /* STATS */
-  .stats-bar{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-bottom:24px;}
+  main{position:relative;z-index:1;padding:28px 32px;max-width:1600px;margin:0 auto;}
+  .stats-bar{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-bottom:28px;}
   .stat-card{background:var(--surface);border:1px solid var(--border);padding:16px 20px;position:relative;overflow:hidden;}
   .stat-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:var(--accent-color,var(--accent));}
   .stat-card .label{font-family:var(--mono);font-size:10px;letter-spacing:2px;color:var(--text-dim);text-transform:uppercase;margin-bottom:8px;}
   .stat-card .value{font-family:var(--sans);font-size:32px;font-weight:900;color:var(--text-bright);line-height:1;}
   .stat-card .pct{font-family:var(--mono);font-size:11px;color:var(--accent-color,var(--accent));margin-top:4px;}
-
-  /* PROGRESS */
-  .progress-wrap{background:var(--surface);border:1px solid var(--border);padding:20px 24px;margin-bottom:24px;}
+  .progress-wrap{background:var(--surface);border:1px solid var(--border);padding:20px 24px;margin-bottom:28px;}
   .progress-title{font-family:var(--sans);font-weight:700;font-size:11px;letter-spacing:3px;text-transform:uppercase;color:var(--text-dim);margin-bottom:16px;}
   .progress-rows{display:flex;flex-direction:column;gap:10px;}
   .progress-row{display:grid;grid-template-columns:120px 1fr 60px;align-items:center;gap:12px;}
@@ -81,15 +57,15 @@
   .progress-bar-wrap{background:var(--surface2);height:6px;border:1px solid var(--border);}
   .progress-bar-fill{height:100%;transition:width 0.5s;}
   .progress-pct{font-family:var(--mono);font-size:10px;color:var(--text-dim);text-align:right;}
-
-  /* FILTERS */
   .filter-bar{display:flex;align-items:center;gap:12px;background:var(--surface);border:1px solid var(--border);padding:12px 16px;margin-bottom:0;flex-wrap:wrap;}
   .filter-label{font-family:var(--mono);font-size:10px;letter-spacing:2px;color:var(--text-dim);}
   .filter-input,.filter-select{font-family:var(--mono);font-size:11px;background:var(--bg);border:1px solid var(--border);color:var(--text);padding:5px 10px;outline:none;}
   .filter-input:focus,.filter-select:focus{border-color:var(--accent);}
   .filter-divider{width:1px;height:24px;background:var(--border);}
-
-  /* TABLE */
+  .bulk-toolbar{display:none;align-items:center;gap:12px;background:rgba(10,74,124,0.08);border:1px solid var(--accent);border-top:none;padding:8px 16px;}
+  .bulk-toolbar.visible{display:flex;}
+  .bulk-count{font-family:var(--mono);font-size:11px;color:var(--accent);}
+  .bulk-divider{width:1px;height:20px;background:var(--accent);opacity:0.3;}
   .table-wrap{overflow-x:auto;border:1px solid var(--border);border-top:none;}
   table{width:100%;border-collapse:collapse;background:var(--surface);}
   th{background:var(--surface2);font-family:var(--mono);font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--text-dim);padding:10px 12px;text-align:left;border-bottom:2px solid var(--border);cursor:pointer;white-space:nowrap;user-select:none;}
@@ -98,45 +74,27 @@
   tr:hover td{background:rgba(10,74,124,0.03);}
   .col-select{width:36px;text-align:center;}
   .sort-icon{opacity:0.4;font-size:9px;}
-
-  /* STATUS BADGES */
   .status-badge{font-family:var(--mono);font-size:10px;letter-spacing:1px;padding:3px 8px;border:1px solid;text-transform:uppercase;}
   .status-released{color:var(--warning);border-color:var(--warning);background:rgba(176,120,0,0.08);}
   .status-shipped{color:#0a6aac;border-color:#0a6aac;background:rgba(10,106,172,0.08);}
   .status-installed{color:var(--success);border-color:var(--success);background:rgba(10,124,74,0.08);}
-  .status-pulled{color:#7c0a7c;border-color:#7c0a7c;background:rgba(124,10,124,0.08);}
-  .status-terminated{color:var(--success);border-color:var(--success);background:rgba(10,124,74,0.08);}
-
-  /* CHECKBOX */
   .check-cell{display:flex;justify-content:center;}
   .check-box{width:20px;height:20px;border:2px solid var(--border);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all 0.15s;background:transparent;}
   .check-box.checked{background:var(--success);border-color:var(--success);}
   .check-box.checked::after{content:'✓';color:#fff;font-size:13px;font-weight:700;line-height:1;}
   .row-check{accent-color:var(--accent);}
-
-  /* DRAWING BUTTON */
   .drawing-btn{display:inline-flex;align-items:center;gap:5px;font-family:var(--mono);font-size:10px;padding:4px 8px;border:1px solid var(--border);color:var(--text-dim);cursor:pointer;background:transparent;transition:all 0.2s;text-decoration:none;}
   .drawing-btn:hover{border-color:var(--accent);color:var(--accent);}
   .drawing-btn.has-link{border-color:var(--accent);color:var(--accent);}
-
-  /* BULK TOOLBAR */
-  .bulk-toolbar{display:none;align-items:center;gap:12px;background:rgba(10,74,124,0.08);border:1px solid var(--accent);border-top:none;padding:8px 16px;}
-  .bulk-toolbar.visible{display:flex;}
-  .bulk-count{font-family:var(--mono);font-size:11px;color:var(--accent);}
-  .bulk-divider{width:1px;height:20px;background:var(--accent);opacity:0.3;}
-
-  /* EMPTY STATE */
   .empty-state{padding:60px 20px;text-align:center;}
   .empty-icon{width:48px;height:48px;margin:0 auto 16px;opacity:0.3;}
   .empty-title{font-family:var(--sans);font-weight:700;font-size:16px;letter-spacing:2px;color:var(--text-dim);text-transform:uppercase;}
   .empty-sub{font-family:var(--mono);font-size:10px;color:var(--text-dim);margin-top:8px;letter-spacing:1px;}
-
-  /* MODALS */
   .modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:1000;align-items:center;justify-content:center;}
   .modal-overlay.open{display:flex;}
   .modal{background:var(--surface);border:1px solid var(--border);padding:32px;width:560px;max-width:95vw;max-height:90vh;overflow-y:auto;position:relative;}
   .modal-title{font-family:var(--sans);font-weight:900;font-size:20px;letter-spacing:3px;text-transform:uppercase;margin-bottom:24px;}
-  .close-modal{position:absolute;top:16px;right:16px;background:none;border:none;font-size:20px;cursor:pointer;color:var(--text-dim);line-height:1;}
+  .close-modal{position:absolute;top:16px;right:16px;background:none;border:none;font-size:20px;cursor:pointer;color:var(--text-dim);}
   .form-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
   .form-field{display:flex;flex-direction:column;gap:6px;}
   .form-field.full{grid-column:1/-1;}
@@ -144,8 +102,6 @@
   .form-input{font-family:var(--mono);font-size:12px;background:var(--bg);border:1px solid var(--border);color:var(--text);padding:8px 12px;outline:none;width:100%;}
   .form-input:focus{border-color:var(--accent);}
   .modal-actions{display:flex;gap:12px;justify-content:flex-end;margin-top:24px;padding-top:20px;border-top:1px solid var(--border);}
-
-  /* BREAKDOWN */
   .breakdown-section{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-top:24px;}
   .breakdown-card{background:var(--surface);border:1px solid var(--border);padding:20px;}
   .breakdown-title{font-family:var(--mono);font-size:10px;letter-spacing:3px;text-transform:uppercase;color:var(--text-dim);margin-bottom:16px;}
@@ -155,10 +111,8 @@
   .breakdown-bar-wrap{width:120px;height:4px;background:var(--surface2);}
   .breakdown-bar-fill{height:100%;background:var(--accent);transition:width 0.4s;}
   .breakdown-stat{font-family:var(--mono);font-size:10px;color:var(--text-dim);white-space:nowrap;}
-
-  /* SHEET MANAGER */
   .sheet-manager{background:var(--surface);border:1px solid var(--border);border-top:none;margin-bottom:24px;}
-  .sheet-manager-header{display:flex;align-items:center;justify-content:space-between;padding:14px 20px;cursor:pointer;border-bottom:1px solid transparent;}
+  .sheet-manager-header{display:flex;align-items:center;justify-content:space-between;padding:14px 20px;cursor:pointer;}
   .sheet-manager-header:hover{background:rgba(10,74,124,0.03);}
   .sheet-manager-header h3{font-family:var(--sans);font-weight:700;font-size:13px;letter-spacing:2px;text-transform:uppercase;}
   .sheet-manager-body{display:none;padding:20px;}
@@ -167,24 +121,14 @@
   .sheet-table th{font-family:var(--mono);font-size:10px;letter-spacing:1px;color:var(--text-dim);padding:6px 10px;border-bottom:1px solid var(--border);text-align:left;}
   .sheet-table td{padding:6px 10px;border-bottom:1px solid var(--surface2);font-family:var(--mono);font-size:11px;}
   .sheet-empty{font-family:var(--mono);font-size:11px;color:var(--text-dim);padding:20px 0;text-align:center;}
-
-  /* WIRE PULL STATUS SELECT */
-  .wp-status-select{font-family:var(--mono);font-size:10px;background:var(--bg);border:1px solid var(--border);color:var(--text);padding:3px 8px;outline:none;cursor:pointer;}
-  .wp-status-select:focus{border-color:var(--accent);}
-
-  /* PDF DROP ZONE */
   .pdf-drop-zone{border:2px dashed var(--border);padding:28px;text-align:center;cursor:pointer;transition:all 0.2s;margin-bottom:16px;}
-  .pdf-drop-zone:hover,.pdf-drop-zone.drag-over{border-color:var(--accent);background:rgba(10,74,124,0.04);}
+  .pdf-drop-zone.drag-over{border-color:var(--accent);background:rgba(10,74,124,0.04);}
   .pdf-drop-title{font-family:var(--sans);font-size:15px;font-weight:700;color:var(--text-dim);letter-spacing:2px;margin-bottom:6px;}
   .pdf-drop-sub{font-family:var(--mono);font-size:11px;color:var(--text-dim);margin-bottom:14px;}
-
-  /* PROGRESS BAR */
   .upload-progress{display:none;margin-bottom:16px;}
   .upload-progress-label{font-family:var(--mono);font-size:11px;color:var(--text-dim);margin-bottom:6px;}
   .upload-progress-bar-wrap{background:var(--surface2);height:6px;border:1px solid var(--border);}
   .upload-progress-bar{height:100%;background:var(--accent);width:0%;transition:width 0.3s;}
-
-  /* PIN */
   .pin-overlay{position:fixed;inset:0;background:var(--bg);z-index:9999;display:flex;align-items:center;justify-content:center;}
   .pin-box{background:var(--surface);border:1px solid var(--border);padding:40px 32px;width:320px;text-align:center;}
   .pin-icon{width:48px;height:48px;margin:0 auto 20px;color:var(--accent);}
@@ -198,37 +142,18 @@
   .pin-key:hover{background:var(--accent);color:#fff;border-color:var(--accent);}
   .pin-key.del{font-size:14px;color:var(--danger);}
   .pin-readonly-btn{background:none;border:none;font-family:var(--mono);font-size:11px;color:var(--text-dim);cursor:pointer;text-decoration:underline;padding:8px;}
-  .pin-readonly-btn:hover{color:var(--accent);}
-
-  /* LOADING */
   .loading-overlay{position:fixed;inset:0;background:var(--bg);z-index:9998;display:flex;align-items:center;justify-content:center;}
   .loading-box{text-align:center;}
   .loading-spinner{width:40px;height:40px;border:3px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin 0.8s linear infinite;margin:0 auto 16px;}
   @keyframes spin{to{transform:rotate(360deg);}}
   .loading-text{font-family:var(--mono);font-size:11px;color:var(--text-dim);letter-spacing:2px;}
-
-  /* TOAST */
   .toast{position:fixed;bottom:24px;right:24px;background:var(--accent);color:#fff;font-family:var(--mono);font-size:12px;padding:12px 20px;z-index:9999;opacity:0;transform:translateY(10px);transition:all 0.3s;pointer-events:none;}
   .toast.show{opacity:1;transform:translateY(0);}
   .toast.error{background:var(--danger);}
-
-  /* PROJECT MODAL */
-  .project-color-picker{display:flex;gap:8px;flex-wrap:wrap;}
-  .color-swatch{width:28px;height:28px;cursor:pointer;border:2px solid transparent;transition:all 0.15s;}
-  .color-swatch.selected{border-color:var(--text);}
-
-  /* EDIT ONLY */
   .edit-only{display:none;}
   body.editor .edit-only{display:flex;}
   body.editor .edit-only-block{display:block;}
   .editor-badge{font-family:var(--mono);font-size:10px;letter-spacing:1px;padding:4px 10px;background:rgba(201,79,26,0.15);color:var(--accent2);border:1px solid var(--accent2);}
-
-  @media(max-width:900px){
-    .stats-bar{grid-template-columns:repeat(2,1fr);}
-    .breakdown-section{grid-template-columns:1fr;}
-    main{padding:16px;}
-    header{padding:12px 16px;}
-  }
 </style>
 </head>
 <body>
@@ -259,14 +184,13 @@
 </div>
 
 <!-- LOADING -->
-<div class="loading-overlay" id="loadingOverlay">
+<div class="loading-overlay" id="loadingOverlay" style="display:none;">
   <div class="loading-box">
     <div class="loading-spinner"></div>
-    <div class="loading-text" id="loadingText">Connecting...</div>
+    <div class="loading-text" id="loadingText">Connecting to database...</div>
   </div>
 </div>
 
-<!-- HEADER -->
 <header>
   <div class="logo-block">
     <div class="logo-icon">
@@ -282,8 +206,7 @@
   </div>
   <div class="header-actions">
     <div class="sync-status" id="syncStatus"><div class="sync-dot"></div><span id="syncText">Connecting...</span></div>
-    <span class="editor-badge edit-only" style="display:none;" id="editorBadge">✎ Editor</span>
-    <button class="btn btn-secondary edit-only" style="padding:7px 14px;font-size:11px;" onclick="openProjectModal()">+ New Project</button>
+    <span class="editor-badge edit-only" id="editorBadge" style="display:none;">✎ Editor</span>
     <label class="csv-input-label edit-only" style="padding:7px 14px;font-size:11px;">
       <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
       Import CSV
@@ -295,244 +218,130 @@
 </header>
 
 <main>
-  <!-- PROJECT TABS -->
-  <div class="project-nav" id="projectNav">
-    <div class="project-tab-add edit-only" onclick="openProjectModal()">+ Project</div>
+  <div class="stats-bar">
+    <div class="stat-card" style="--accent-color:var(--accent)"><div class="label">Total Assemblies</div><div class="value" id="statTotal">0</div><div class="pct">ALL TRACKED</div></div>
+    <div class="stat-card" style="--accent-color:var(--warning)"><div class="label">Released to Shop</div><div class="value" id="statReleased">0</div><div class="pct" id="statReleasedPct"></div></div>
+    <div class="stat-card" style="--accent-color:#0a6aac"><div class="label">Prefab Complete</div><div class="value" id="statPrefab">0</div><div class="pct" id="statPrefabPct"></div></div>
+    <div class="stat-card" style="--accent-color:#0a6aac"><div class="label">Shipped to Site</div><div class="value" id="statShipped">0</div><div class="pct" id="statShippedPct"></div></div>
+    <div class="stat-card" style="--accent-color:var(--success)"><div class="label">Installed in Field</div><div class="value" id="statInstalled">0</div><div class="pct" id="statInstalledPct"></div></div>
   </div>
 
-  <!-- INNER TABS -->
-  <div style="background:var(--surface);border:1px solid var(--border);border-top:none;padding:0 20px;">
-    <div class="inner-nav">
-      <div class="inner-tab active" id="tabAssemblies" onclick="switchInnerTab('assemblies')">📦 Assemblies</div>
-      <div class="inner-tab" id="tabWirePulls" onclick="switchInnerTab('wirepulls')">⚡ Wire Pulls</div>
-    </div>
-  </div>
-
-  <!-- ASSEMBLIES VIEW -->
-  <div id="viewAssemblies">
-    <!-- STATS -->
-    <div class="stats-bar" style="margin-top:20px;">
-      <div class="stat-card" style="--accent-color:var(--accent)"><div class="label">Total Assemblies</div><div class="value" id="statTotal">0</div><div class="pct">ALL TRACKED</div></div>
-      <div class="stat-card" style="--accent-color:var(--warning)"><div class="label">Released to Shop</div><div class="value" id="statReleased">0</div><div class="pct" id="statReleasedPct"></div></div>
-      <div class="stat-card" style="--accent-color:#0a6aac"><div class="label">Prefab Complete</div><div class="value" id="statPrefab">0</div><div class="pct" id="statPrefabPct"></div></div>
-      <div class="stat-card" style="--accent-color:#0a6aac"><div class="label">Shipped to Site</div><div class="value" id="statShipped">0</div><div class="pct" id="statShippedPct"></div></div>
-      <div class="stat-card" style="--accent-color:var(--success)"><div class="label">Installed in Field</div><div class="value" id="statInstalled">0</div><div class="pct" id="statInstalledPct"></div></div>
-    </div>
-
-    <!-- PROGRESS -->
-    <div class="progress-wrap">
-      <div class="progress-title">Prefab Overview <span id="progressScope" style="color:var(--accent);font-size:9px;margin-left:8px;"></span></div>
-      <div class="progress-rows">
-        <div class="progress-row"><div class="progress-label">Released</div><div class="progress-bar-wrap"><div class="progress-bar-fill" id="pb-released" style="background:var(--warning);width:0%"></div></div><div class="progress-pct" id="pp-released">0%</div></div>
-        <div class="progress-row"><div class="progress-label">Prefab Done</div><div class="progress-bar-wrap"><div class="progress-bar-fill" id="pb-prefab" style="background:#0a6aac;width:0%"></div></div><div class="progress-pct" id="pp-prefab">0%</div></div>
-        <div class="progress-row"><div class="progress-label">Shipped</div><div class="progress-bar-wrap"><div class="progress-bar-fill" id="pb-shipped" style="background:#0a6aac;width:0%"></div></div><div class="progress-pct" id="pp-shipped">0%</div></div>
-        <div class="progress-row"><div class="progress-label">Installed</div><div class="progress-bar-wrap"><div class="progress-bar-fill" id="pb-installed" style="background:var(--success);width:0%"></div></div><div class="progress-pct" id="pp-installed">0%</div></div>
-      </div>
-    </div>
-
-    <!-- FILTER BAR -->
-    <div class="filter-bar">
-      <div class="filter-label">Search</div>
-      <input class="filter-input" id="searchInput" placeholder="Spool ID, Package, LBS..." oninput="applyFilters()" style="width:200px;">
-      <div class="filter-divider"></div>
-      <div class="filter-label">Package</div>
-      <select class="filter-select" id="filterPackage" onchange="applyFilters()"><option value="">All</option></select>
-      <div class="filter-label">Level</div>
-      <select class="filter-select" id="filterLBS" onchange="applyFilters()"><option value="">All</option></select>
-      <div class="filter-label">Status</div>
-      <select class="filter-select" id="filterStatus" onchange="applyFilters()">
-        <option value="">All</option><option value="released">Released</option>
-        <option value="shipped">Shipped</option><option value="installed">Installed</option>
-      </select>
-      <div class="filter-divider"></div>
-      <button class="btn btn-secondary" style="padding:5px 12px;font-size:11px;" onclick="clearFilters()">Clear</button>
-      <div style="margin-left:auto;font-family:var(--mono);font-size:11px;color:var(--text-dim);">
-        Showing <span id="showing-count">0</span> of <span id="total-count">0</span>
-      </div>
-    </div>
-
-    <!-- BULK TOOLBAR -->
-    <div class="bulk-toolbar" id="bulkToolbar">
-      <span class="bulk-count"><span id="bulkCount">0</span> selected</span>
-      <div class="bulk-divider"></div>
-      <button class="btn btn-primary edit-only" style="padding:5px 14px;font-size:11px;" onclick="openBulkModal()">✎ Edit Selected</button>
-      <button class="btn btn-secondary" style="padding:5px 12px;font-size:11px;" onclick="clearSelection()">Deselect All</button>
-      <span style="font-family:var(--mono);font-size:10px;color:var(--text-dim);margin-left:4px;">SHIFT+CLICK range</span>
-      <button class="btn btn-danger edit-only" style="padding:5px 12px;font-size:11px;margin-left:auto;" onclick="bulkDelete()">✕ Delete</button>
-    </div>
-
-    <!-- TABLE -->
-    <div class="table-wrap" id="tableWrap">
-      <div class="empty-state" id="emptyState">
-        <div class="empty-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg></div>
-        <div class="empty-title">No Assemblies</div>
-        <div class="empty-sub">IMPORT A CSV FROM REVIT TO GET STARTED</div>
-      </div>
-      <table id="mainTable" style="display:none;">
-        <thead>
-          <tr>
-            <th class="col-select"><input type="checkbox" class="row-check" id="selectAll" onchange="toggleSelectAll(this.checked)"></th>
-            <th onclick="sortTable('spool_id')">Spool ID <span class="sort-icon">▴</span></th>
-            <th onclick="sortTable('package_id')">Package ID <span class="sort-icon">▴</span></th>
-            <th onclick="sortTable('lbs_id')">Location <span class="sort-icon">▴</span></th>
-            <th onclick="sortTable('release_date')">Release Date <span class="sort-icon">▴</span></th>
-            <th style="text-align:center">Prefab Done</th>
-            <th onclick="sortTable('ship_date')">Ship Date <span class="sort-icon">▴</span></th>
-            <th style="text-align:center">Installed</th>
-            <th onclick="sortTable('sheet_number')">Sheet <span class="sort-icon">▴</span></th>
-            <th>Drawing</th>
-            <th>Status</th>
-            <th>Actions</th>
-          </tr>
-        </thead>
-        <tbody id="tableBody"></tbody>
-      </table>
-    </div>
-
-    <!-- PDF DRAWINGS SECTION -->
-    <div class="sheet-manager edit-only-block" id="sheetManager" style="display:none;">
-      <div class="sheet-manager-header" onclick="toggleSheetManager()">
-        <h3>📄 Contract Drawings <span id="sheetCount" style="color:var(--text-dim);font-weight:400;font-size:11px;"></span></h3>
-        <span id="sheetManagerToggle" style="font-family:var(--mono);font-size:11px;color:var(--text-dim);">▼ Show</span>
-      </div>
-      <div class="sheet-manager-body" id="sheetManagerBody">
-        <div style="font-family:var(--mono);font-size:10px;color:var(--text-dim);margin-bottom:16px;line-height:1.8;">
-          Upload contract drawing PDFs named by sheet number — e.g. <strong style="color:var(--accent)">G7-303.pdf</strong>, <strong style="color:var(--accent)">JB-7S801.pdf</strong><br>
-          The tracker matches the filename to the assembly sheet number automatically.
-        </div>
-        <div class="pdf-drop-zone" id="drawingDropZone"
-             ondragover="event.preventDefault();this.classList.add('drag-over')"
-             ondragleave="this.classList.remove('drag-over')"
-             ondrop="handleDrawingDrop(event)">
-          <div class="pdf-drop-title">DRAG & DROP DRAWING PDFs</div>
-          <div class="pdf-drop-sub">Name files by sheet number: G7-303.pdf, JB-7S801.pdf</div>
-          <input type="file" id="drawingFileInput" accept=".pdf" multiple style="display:none" onchange="handleDrawingFiles(this.files)">
-          <button class="btn btn-primary" onclick="document.getElementById('drawingFileInput').click();event.stopPropagation()">Select PDFs</button>
-        </div>
-        <div class="upload-progress" id="drawingUploadProgress">
-          <div class="upload-progress-label" id="drawingProgressLabel">Uploading...</div>
-          <div class="upload-progress-bar-wrap"><div class="upload-progress-bar" id="drawingProgressBar"></div></div>
-        </div>
-        <div id="drawingTableWrap"><div class="sheet-empty">No drawings uploaded yet</div></div>
-      </div>
-    </div>
-
-    <!-- BREAKDOWN -->
-    <div class="breakdown-section">
-      <div class="breakdown-card">
-        <div class="breakdown-title">By Package ID</div>
-        <div id="breakdownPackage"></div>
-      </div>
-      <div class="breakdown-card">
-        <div class="breakdown-title">By Level</div>
-        <div id="breakdownLBS"></div>
-      </div>
+  <div class="progress-wrap">
+    <div class="progress-title">Prefab Overview</div>
+    <div class="progress-rows">
+      <div class="progress-row"><div class="progress-label">Released</div><div class="progress-bar-wrap"><div class="progress-bar-fill" id="pb-released" style="background:var(--warning);width:0%"></div></div><div class="progress-pct" id="pp-released">0%</div></div>
+      <div class="progress-row"><div class="progress-label">Prefab Done</div><div class="progress-bar-wrap"><div class="progress-bar-fill" id="pb-prefab" style="background:#0a6aac;width:0%"></div></div><div class="progress-pct" id="pp-prefab">0%</div></div>
+      <div class="progress-row"><div class="progress-label">Shipped</div><div class="progress-bar-wrap"><div class="progress-bar-fill" id="pb-shipped" style="background:#0a6aac;width:0%"></div></div><div class="progress-pct" id="pp-shipped">0%</div></div>
+      <div class="progress-row"><div class="progress-label">Installed</div><div class="progress-bar-wrap"><div class="progress-bar-fill" id="pb-installed" style="background:var(--success);width:0%"></div></div><div class="progress-pct" id="pp-installed">0%</div></div>
     </div>
   </div>
 
-  <!-- WIRE PULLS VIEW -->
-  <div id="viewWirePulls" style="display:none;">
-    <!-- WP STATS -->
-    <div class="stats-bar" style="margin-top:20px;">
-      <div class="stat-card" style="--accent-color:var(--accent)"><div class="label">Total Panels</div><div class="value" id="wpStatTotal">0</div><div class="pct">ALL TRACKED</div></div>
-      <div class="stat-card" style="--accent-color:var(--warning)"><div class="label">Released</div><div class="value" id="wpStatReleased">0</div><div class="pct" id="wpStatReleasedPct"></div></div>
-      <div class="stat-card" style="--accent-color:#0a6aac"><div class="label">Shipped</div><div class="value" id="wpStatShipped">0</div><div class="pct" id="wpStatShippedPct"></div></div>
-      <div class="stat-card" style="--accent-color:#7c0a7c"><div class="label">Pulled</div><div class="value" id="wpStatPulled">0</div><div class="pct" id="wpStatPulledPct"></div></div>
-      <div class="stat-card" style="--accent-color:var(--success)"><div class="label">Terminated</div><div class="value" id="wpStatTerminated">0</div><div class="pct" id="wpStatTerminatedPct"></div></div>
+  <div class="filter-bar">
+    <div class="filter-label">Search</div>
+    <input class="filter-input" id="searchInput" placeholder="Spool ID, Package, LBS..." oninput="applyFilters()" style="width:200px;">
+    <div class="filter-divider"></div>
+    <div class="filter-label">Package</div>
+    <select class="filter-select" id="filterPackage" onchange="applyFilters()"><option value="">All</option></select>
+    <div class="filter-label">Level</div>
+    <select class="filter-select" id="filterLBS" onchange="applyFilters()"><option value="">All</option></select>
+    <div class="filter-label">Status</div>
+    <select class="filter-select" id="filterStatus" onchange="applyFilters()">
+      <option value="">All</option><option value="released">Released</option>
+      <option value="shipped">Shipped</option><option value="installed">Installed</option>
+    </select>
+    <div class="filter-divider"></div>
+    <button class="btn btn-secondary" style="padding:5px 12px;font-size:11px;" onclick="clearFilters()">Clear</button>
+    <div style="margin-left:auto;font-family:var(--mono);font-size:11px;color:var(--text-dim);">
+      Showing <span id="showing-count">0</span> of <span id="total-count">0</span>
     </div>
+  </div>
 
-    <!-- WP PROGRESS -->
-    <div class="progress-wrap">
-      <div class="progress-title">Wire Pull Progress</div>
-      <div class="progress-rows">
-        <div class="progress-row"><div class="progress-label">Released</div><div class="progress-bar-wrap"><div class="progress-bar-fill" id="wpb-released" style="background:var(--warning);width:0%"></div></div><div class="progress-pct" id="wpp-released">0%</div></div>
-        <div class="progress-row"><div class="progress-label">Shipped</div><div class="progress-bar-wrap"><div class="progress-bar-fill" id="wpb-shipped" style="background:#0a6aac;width:0%"></div></div><div class="progress-pct" id="wpp-shipped">0%</div></div>
-        <div class="progress-row"><div class="progress-label">Pulled</div><div class="progress-bar-wrap"><div class="progress-bar-fill" id="wpb-pulled" style="background:#7c0a7c;width:0%"></div></div><div class="progress-pct" id="wpp-pulled">0%</div></div>
-        <div class="progress-row"><div class="progress-label">Terminated</div><div class="progress-bar-wrap"><div class="progress-bar-fill" id="wpb-terminated" style="background:var(--success);width:0%"></div></div><div class="progress-pct" id="wpp-terminated">0%</div></div>
-      </div>
+  <div class="bulk-toolbar" id="bulkToolbar">
+    <span class="bulk-count"><span id="bulkCount">0</span> selected</span>
+    <div class="bulk-divider"></div>
+    <button class="btn btn-primary edit-only" style="padding:5px 14px;font-size:11px;" onclick="openBulkModal()">✎ Edit Selected</button>
+    <button class="btn btn-secondary" style="padding:5px 12px;font-size:11px;" onclick="clearSelection()">Deselect All</button>
+    <span style="font-family:var(--mono);font-size:10px;color:var(--text-dim);margin-left:4px;">SHIFT+CLICK range · CTRL+CLICK multi</span>
+    <button class="btn btn-danger edit-only" style="padding:5px 12px;font-size:11px;margin-left:auto;" onclick="bulkDelete()">✕ Delete</button>
+  </div>
+
+  <div class="table-wrap" id="tableWrap">
+    <div class="empty-state" id="emptyState">
+      <div class="empty-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg></div>
+      <div class="empty-title">No Assemblies Loaded</div>
+      <div class="empty-sub">IMPORT A CSV FROM REVIT OR ADD ASSEMBLIES MANUALLY</div>
     </div>
+    <table id="mainTable" style="display:none;">
+      <thead>
+        <tr>
+          <th class="col-select"><input type="checkbox" class="row-check" id="selectAll" onchange="toggleSelectAll(this.checked)"></th>
+          <th onclick="sortTable('spool_id')">Spool ID <span class="sort-icon">▴</span></th>
+          <th onclick="sortTable('package_id')">Package ID <span class="sort-icon">▴</span></th>
+          <th onclick="sortTable('lbs_id')">Location <span class="sort-icon">▴</span></th>
+          <th onclick="sortTable('release_date')">Release Date <span class="sort-icon">▴</span></th>
+          <th style="text-align:center">Prefab Done</th>
+          <th onclick="sortTable('ship_date')">Ship Date <span class="sort-icon">▴</span></th>
+          <th style="text-align:center">Installed</th>
+          <th onclick="sortTable('sheet_number')">Sheet <span class="sort-icon">▴</span></th>
+          <th>Drawing</th>
+          <th>Status</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody id="tableBody"></tbody>
+    </table>
+  </div>
 
-    <!-- WP FILTER -->
-    <div class="filter-bar">
-      <div class="filter-label">Search</div>
-      <input class="filter-input" id="wpSearchInput" placeholder="Panel name..." oninput="renderWirePulls()" style="width:200px;">
-      <div class="filter-divider"></div>
-      <div class="filter-label">Status</div>
-      <select class="filter-select" id="wpFilterStatus" onchange="renderWirePulls()">
-        <option value="">All</option>
-        <option value="released">Released</option>
-        <option value="shipped">Shipped</option>
-        <option value="pulled">Pulled</option>
-        <option value="terminated">Terminated</option>
-      </select>
-      <div class="filter-divider"></div>
-      <button class="btn btn-secondary" style="padding:5px 12px;font-size:11px;" onclick="clearWpFilters()">Clear</button>
-      <button class="btn btn-primary edit-only" style="padding:5px 14px;font-size:11px;margin-left:auto;" onclick="openAddWpModal()">+ Add Panel</button>
-      <div style="font-family:var(--mono);font-size:11px;color:var(--text-dim);margin-left:12px;">
-        <span id="wpShowingCount">0</span> of <span id="wpTotalCount">0</span>
-      </div>
+  <!-- PDF DRAWINGS SECTION - editor only -->
+  <div class="sheet-manager edit-only-block" id="sheetManager" style="display:none;">
+    <div class="sheet-manager-header" onclick="toggleSheetManager()">
+      <h3>📄 Drawing PDFs <span id="sheetCount" style="color:var(--text-dim);font-weight:400;font-size:11px;"></span></h3>
+      <span id="sheetManagerToggle" style="font-family:var(--mono);font-size:11px;color:var(--text-dim);">▼ Show</span>
     </div>
-
-    <!-- WP TABLE -->
-    <div class="table-wrap">
-      <div class="empty-state" id="wpEmptyState">
-        <div class="empty-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M13 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V9z"/><polyline points="13 2 13 9 20 9"/></svg></div>
-        <div class="empty-title">No Wire Pulls</div>
-        <div class="empty-sub">ADD PANELS MANUALLY OR IMPORT A CSV</div>
+    <div class="sheet-manager-body" id="sheetManagerBody">
+      <div style="font-family:var(--mono);font-size:10px;color:var(--text-dim);margin-bottom:16px;line-height:1.8;">
+        Upload PDFs named by sheet number — e.g. <strong style="color:var(--accent)">G7-303.pdf</strong>, <strong style="color:var(--accent)">JB-7S801.pdf</strong><br>
+        Filename must match the sheet number exactly. Drawing links auto-populate for all matching assemblies.
       </div>
-      <table id="wpTable" style="display:none;">
-        <thead>
-          <tr>
-            <th onclick="sortWp('panel_name')">Panel Name <span class="sort-icon">▴</span></th>
-            <th>Status</th>
-            <th>Drawing</th>
-            <th>Notes</th>
-            <th>Actions</th>
-          </tr>
-        </thead>
-        <tbody id="wpTableBody"></tbody>
-      </table>
+      <div class="pdf-drop-zone" id="drawingDropZone"
+           ondragover="event.preventDefault();this.classList.add('drag-over')"
+           ondragleave="this.classList.remove('drag-over')"
+           ondrop="handleDrawingDrop(event)">
+        <div class="pdf-drop-title">DRAG & DROP PDFs HERE</div>
+        <div class="pdf-drop-sub">Name files by sheet number: G7-303.pdf, JB-7S801.pdf</div>
+        <input type="file" id="drawingFileInput" accept=".pdf" multiple style="display:none" onchange="handleDrawingFiles(this.files)">
+        <button class="btn btn-primary" onclick="document.getElementById('drawingFileInput').click();event.stopPropagation()">Select PDFs</button>
+      </div>
+      <div class="upload-progress" id="drawingUploadProgress">
+        <div class="upload-progress-label" id="drawingProgressLabel">Uploading...</div>
+        <div class="upload-progress-bar-wrap"><div class="upload-progress-bar" id="drawingProgressBar"></div></div>
+      </div>
+      <div id="drawingTableWrap"><div class="sheet-empty">No drawings uploaded yet — drag and drop PDFs above</div></div>
     </div>
+  </div>
 
-    <!-- WP PDF UPLOAD -->
-    <div class="sheet-manager edit-only-block" style="display:none;" id="wpPdfSection">
-      <div class="sheet-manager-header" onclick="toggleWpPdfSection()">
-        <h3>⚡ Wire Pull PDFs <span id="wpPdfCount" style="color:var(--text-dim);font-weight:400;font-size:11px;"></span></h3>
-        <span id="wpPdfToggle" style="font-family:var(--mono);font-size:11px;color:var(--text-dim);">▼ Show</span>
-      </div>
-      <div class="sheet-manager-body" id="wpPdfBody">
-        <div style="font-family:var(--mono);font-size:10px;color:var(--text-dim);margin-bottom:16px;line-height:1.8;">
-          Upload wire pull PDFs named by panel — e.g. <strong style="color:var(--accent)">EC2PP207B4.pdf</strong><br>
-          Filename must match the panel name exactly.
-        </div>
-        <div class="pdf-drop-zone" id="wpDropZone"
-             ondragover="event.preventDefault();this.classList.add('drag-over')"
-             ondragleave="this.classList.remove('drag-over')"
-             ondrop="handleWpDrop(event)">
-          <div class="pdf-drop-title">DRAG & DROP WIRE PULL PDFs</div>
-          <div class="pdf-drop-sub">Name files by panel: EC2PP207B4.pdf</div>
-          <input type="file" id="wpFileInput" accept=".pdf" multiple style="display:none" onchange="handleWpFiles(this.files)">
-          <button class="btn btn-primary" onclick="document.getElementById('wpFileInput').click();event.stopPropagation()">Select PDFs</button>
-        </div>
-        <div class="upload-progress" id="wpUploadProgress">
-          <div class="upload-progress-label" id="wpProgressLabel">Uploading...</div>
-          <div class="upload-progress-bar-wrap"><div class="upload-progress-bar" id="wpProgressBar"></div></div>
-        </div>
-      </div>
+  <div class="breakdown-section">
+    <div class="breakdown-card">
+      <div class="breakdown-title">By Package ID</div>
+      <div id="breakdownPackage"></div>
+    </div>
+    <div class="breakdown-card">
+      <div class="breakdown-title">By Level</div>
+      <div id="breakdownLBS"></div>
     </div>
   </div>
 </main>
 
-<!-- ADD ASSEMBLY MODAL -->
+<!-- ADD MODAL -->
 <div class="modal-overlay" id="addModalOverlay">
   <div class="modal">
     <button class="close-modal" onclick="closeModal()">×</button>
     <div class="modal-title">Add Assembly</div>
     <div class="form-grid">
-      <div class="form-field"><label class="form-label">Spool ID <span style="color:var(--accent2)">*</span></label><input class="form-input" id="f_spoolId" placeholder="e.g. G7-58"></div>
-      <div class="form-field"><label class="form-label">Package ID</label><input class="form-input" id="f_packageId" placeholder="e.g. (PFP) LEVEL 7"></div>
-      <div class="form-field"><label class="form-label">Location</label><input class="form-input" id="f_lbsId" placeholder="e.g. LEVEL 7 AREA 1"></div>
-      <div class="form-field"><label class="form-label">Sheet Number</label><input class="form-input" id="f_sheetNumber" placeholder="e.g. G7-58"></div>
+      <div class="form-field"><label class="form-label">Spool ID *</label><input class="form-input" id="f_spoolId" placeholder="e.g. G7-58"></div>
+      <div class="form-field"><label class="form-label">Package ID</label><input class="form-input" id="f_packageId"></div>
+      <div class="form-field"><label class="form-label">Location</label><input class="form-input" id="f_lbsId"></div>
+      <div class="form-field"><label class="form-label">Sheet Number</label><input class="form-input" id="f_sheetNumber"></div>
       <div class="form-field"><label class="form-label">Release Date</label><input class="form-input" type="date" id="f_releaseDate"></div>
       <div class="form-field"><label class="form-label">Ship Date</label><input class="form-input" type="date" id="f_shipDate"></div>
     </div>
@@ -554,7 +363,7 @@
       <div class="form-field"><label class="form-label">Ship Date</label><input class="form-input" type="date" id="bulk_shipDate"></div>
       <div class="form-field full">
         <label class="form-label" style="margin-bottom:10px;">Prefab Done</label>
-        <div style="display:flex;gap:10px;flex-wrap:wrap;">
+        <div style="display:flex;gap:10px;">
           <label style="display:flex;align-items:center;gap:8px;font-family:var(--mono);font-size:11px;cursor:pointer;"><input type="radio" name="bulk_prefab" value="no-change" checked> No change</label>
           <label style="display:flex;align-items:center;gap:8px;font-family:var(--mono);font-size:11px;cursor:pointer;"><input type="radio" name="bulk_prefab" value="true"> ✓ Mark Done</label>
           <label style="display:flex;align-items:center;gap:8px;font-family:var(--mono);font-size:11px;cursor:pointer;"><input type="radio" name="bulk_prefab" value="false"> ✕ Undo</label>
@@ -562,7 +371,7 @@
       </div>
       <div class="form-field full">
         <label class="form-label" style="margin-bottom:10px;">Installed</label>
-        <div style="display:flex;gap:10px;flex-wrap:wrap;">
+        <div style="display:flex;gap:10px;">
           <label style="display:flex;align-items:center;gap:8px;font-family:var(--mono);font-size:11px;cursor:pointer;"><input type="radio" name="bulk_installed" value="no-change" checked> No change</label>
           <label style="display:flex;align-items:center;gap:8px;font-family:var(--mono);font-size:11px;cursor:pointer;"><input type="radio" name="bulk_installed" value="true"> ✓ Mark Installed</label>
           <label style="display:flex;align-items:center;gap:8px;font-family:var(--mono);font-size:11px;cursor:pointer;"><input type="radio" name="bulk_installed" value="false"> ✕ Undo</label>
@@ -589,61 +398,10 @@
   </div>
 </div>
 
-<!-- ADD PROJECT MODAL -->
-<div class="modal-overlay" id="projectModalOverlay">
-  <div class="modal" style="width:480px;">
-    <button class="close-modal" onclick="closeProjectModal()">×</button>
-    <div class="modal-title">New Project</div>
-    <div class="form-grid">
-      <div class="form-field full"><label class="form-label">Project Name <span style="color:var(--accent2)">*</span></label><input class="form-input" id="proj_name" placeholder="e.g. CHOP NPT"></div>
-      <div class="form-field full"><label class="form-label">Description</label><input class="form-input" id="proj_desc" placeholder="e.g. Children's Hospital of Philadelphia"></div>
-      <div class="form-field full">
-        <label class="form-label" style="margin-bottom:8px;">Color</label>
-        <div class="project-color-picker" id="colorPicker">
-          <div class="color-swatch selected" style="background:#0a4a7c;" data-color="#0a4a7c" onclick="selectColor(this)"></div>
-          <div class="color-swatch" style="background:#c94f1a;" data-color="#c94f1a" onclick="selectColor(this)"></div>
-          <div class="color-swatch" style="background:#0a7c4a;" data-color="#0a7c4a" onclick="selectColor(this)"></div>
-          <div class="color-swatch" style="background:#7c0a7c;" data-color="#7c0a7c" onclick="selectColor(this)"></div>
-          <div class="color-swatch" style="background:#b07800;" data-color="#b07800" onclick="selectColor(this)"></div>
-          <div class="color-swatch" style="background:#2a7c8a;" data-color="#2a7c8a" onclick="selectColor(this)"></div>
-        </div>
-      </div>
-    </div>
-    <div class="modal-actions">
-      <button class="btn btn-secondary" onclick="closeProjectModal()">Cancel</button>
-      <button class="btn btn-primary" onclick="createProject()">Create Project</button>
-    </div>
-  </div>
-</div>
-
-<!-- ADD WIRE PULL MODAL -->
-<div class="modal-overlay" id="wpModalOverlay">
-  <div class="modal" style="width:480px;">
-    <button class="close-modal" onclick="closeWpModal()">×</button>
-    <div class="modal-title">Add Wire Pull</div>
-    <div class="form-grid">
-      <div class="form-field full"><label class="form-label">Panel Name <span style="color:var(--accent2)">*</span></label><input class="form-input" id="wp_panelName" placeholder="e.g. EC2PP207B4"></div>
-      <div class="form-field full">
-        <label class="form-label">Status</label>
-        <select class="form-input" id="wp_status">
-          <option value="released">Released</option>
-          <option value="shipped">Shipped</option>
-          <option value="pulled">Pulled</option>
-          <option value="terminated">Terminated</option>
-        </select>
-      </div>
-      <div class="form-field full"><label class="form-label">Notes</label><input class="form-input" id="wp_notes" placeholder="Optional notes..."></div>
-    </div>
-    <div class="modal-actions">
-      <button class="btn btn-secondary" onclick="closeWpModal()">Cancel</button>
-      <button class="btn btn-primary" onclick="addWirePull()">Add Panel</button>
-    </div>
-  </div>
-</div>
-
 <div class="toast" id="toast"></div>
 
 <script>
+// ─── CONFIG ──────────────────────────────────────────────────────
 const SUPABASE_URL = 'https://vgpoytvlzvjozgrbribq.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZncG95dHZsenZqb3pncmJyaWJxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM0NDQwNDAsImV4cCI6MjA4OTAyMDA0MH0.Mbl8t11OeMULWlqHK1GnN9BDgFx87u_hogpMPrR-o4E';
 const PIN = '1884';
@@ -651,84 +409,76 @@ const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
 // ─── STATE ───────────────────────────────────────────────────────
 let isEditor = false;
-let projects = [];
-let currentProjectId = null;
 let assemblies = [];
-let wirePulls = [];
 let filteredRows = [];
 let selectedIds = new Set();
 let sortKey = 'spool_id', sortAsc = true;
-let wpSortKey = 'panel_name', wpSortAsc = true;
 let csvParsedHeaders = [], csvParsedRows = [];
-let currentInnerTab = 'assemblies';
 let lastSelectedIdx = -1;
+let uploadedDrawings = [];
 
 // ─── PIN ─────────────────────────────────────────────────────────
 let pinEntry = '';
 function pinKey(k) {
   if (pinEntry.length >= 4) return;
   pinEntry += k;
-  document.getElementById('pd'+(pinEntry.length-1)).classList.add('filled');
+  document.getElementById('pd' + (pinEntry.length - 1)).classList.add('filled');
   if (pinEntry.length === 4) {
     setTimeout(() => {
       if (pinEntry === PIN) { isEditor = true; enterApp(); }
-      else { pinEntry=''; document.querySelectorAll('.pin-dot').forEach(d=>d.classList.remove('filled')); }
+      else { pinEntry = ''; document.querySelectorAll('.pin-dot').forEach(d => d.classList.remove('filled')); }
     }, 150);
   }
 }
 function pinBackspace() {
   if (!pinEntry.length) return;
-  pinEntry = pinEntry.slice(0,-1);
-  document.getElementById('pd'+pinEntry.length).classList.remove('filled');
+  pinEntry = pinEntry.slice(0, -1);
+  document.getElementById('pd' + pinEntry.length).classList.remove('filled');
 }
 function enterReadOnly() { isEditor = false; enterApp(); }
+
 function enterApp() {
   document.getElementById('pinOverlay').style.display = 'none';
   if (isEditor) {
     document.body.classList.add('editor');
     document.getElementById('editorBadge').style.display = 'flex';
     document.getElementById('sheetManager').style.display = 'block';
-    document.getElementById('wpPdfSection').style.display = 'block';
   }
   sessionStorage.setItem('pf_editor', isEditor ? '1' : '0');
-  init();
-}
-// Check session — restore editor state and start app
-const _savedSession = sessionStorage.getItem('pf_editor');
-if (_savedSession !== null) {
-  isEditor = _savedSession === '1';
-  document.getElementById('pinOverlay').style.display = 'none';
-  if (isEditor) {
-    document.body.classList.add('editor');
-    document.getElementById('editorBadge').style.display = 'flex';
-    document.getElementById('sheetManager').style.display = 'block';
-    document.getElementById('wpPdfSection').style.display = 'block';
-  }
-  setTimeout(init, 50);
+  startApp();
 }
 
-// ─── INIT ────────────────────────────────────────────────────────
-async function init() {
-  document.getElementById('loadingOverlay').style.display = 'flex';
-  setSync('syncing','Connecting...');
-  try {
-    await loadProjects();
-    if (projects.length === 0) {
-      // Create default project
-      await sb.from('projects').insert({ id:'CHOP-NPT', name:'CHOP NPT', description:'Default Project', color:'#0a4a7c' });
-      await loadProjects();
+// Restore session on page reload
+window.addEventListener('DOMContentLoaded', function() {
+  const saved = sessionStorage.getItem('pf_editor');
+  if (saved !== null) {
+    isEditor = saved === '1';
+    document.getElementById('pinOverlay').style.display = 'none';
+    if (isEditor) {
+      document.body.classList.add('editor');
+      document.getElementById('editorBadge').style.display = 'flex';
+      document.getElementById('sheetManager').style.display = 'block';
     }
-    if (!currentProjectId) currentProjectId = projects[0]?.id;
-    renderProjectTabs();
-    await loadAll();
-    setSync('connected','Live · All users synced');
+    startApp();
+  }
+});
 
-    // Realtime
-    sb.channel('assemblies').on('postgres_changes',{event:'*',schema:'public',table:'assemblies'},async()=>{ await loadAll(); }).subscribe();
-    sb.channel('wire_pulls').on('postgres_changes',{event:'*',schema:'public',table:'wire_pulls'},async()=>{ await loadWirePulls(); }).subscribe();
+// ─── APP START ───────────────────────────────────────────────────
+async function startApp() {
+  document.getElementById('loadingOverlay').style.display = 'flex';
+  setSync('syncing', 'Connecting...');
+  try {
+    await loadAll();
+    setSync('connected', 'Live · All users synced');
+    // Realtime subscription
+    sb.channel('db-changes')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'assemblies' }, async () => {
+        await loadAll();
+      })
+      .subscribe();
   } catch(e) {
-    console.error(e);
-    setSync('error','Connection failed');
+    console.error('Connection error:', e);
+    setSync('error', 'Connection failed');
   }
   document.getElementById('loadingOverlay').style.display = 'none';
 }
@@ -739,113 +489,40 @@ function setSync(state, text) {
   document.getElementById('syncText').textContent = text;
 }
 
-// ─── PROJECTS ────────────────────────────────────────────────────
-async function loadProjects() {
-  const { data, error } = await sb.from('projects').select('*').order('created_at');
-  if (!error) projects = data || [];
-}
-
-function renderProjectTabs() {
-  const nav = document.getElementById('projectNav');
-  const addBtn = nav.querySelector('.project-tab-add');
-  nav.innerHTML = '';
-  projects.forEach(p => {
-    const tab = document.createElement('div');
-    tab.className = 'project-tab' + (p.id === currentProjectId ? ' active' : '');
-    tab.textContent = p.name;
-    tab.style.borderTopColor = p.id === currentProjectId ? p.color || 'var(--accent)' : 'transparent';
-    tab.onclick = () => switchProject(p.id);
-    nav.appendChild(tab);
-  });
-  if (isEditor) {
-    const add = document.createElement('div');
-    add.className = 'project-tab-add edit-only';
-    add.textContent = '+ Project';
-    add.onclick = openProjectModal;
-    nav.appendChild(add);
-  }
-}
-
-async function switchProject(id) {
-  currentProjectId = id;
-  renderProjectTabs();
-  document.getElementById('loadingOverlay').style.display = 'flex';
-  await loadAll();
-  document.getElementById('loadingOverlay').style.display = 'none';
-}
-
-function openProjectModal() { document.getElementById('projectModalOverlay').classList.add('open'); }
-function closeProjectModal() { document.getElementById('projectModalOverlay').classList.remove('open'); document.getElementById('proj_name').value=''; document.getElementById('proj_desc').value=''; }
-function selectColor(el) { document.querySelectorAll('.color-swatch').forEach(s=>s.classList.remove('selected')); el.classList.add('selected'); }
-
-async function createProject() {
-  const name = document.getElementById('proj_name').value.trim();
-  if (!name) { showToast('Project name required', true); return; }
-  const color = document.querySelector('.color-swatch.selected')?.dataset.color || '#0a4a7c';
-  const id = name.toUpperCase().replace(/\s+/g,'-').replace(/[^A-Z0-9\-]/g,'');
-  const desc = document.getElementById('proj_desc').value.trim();
-  const { error } = await sb.from('projects').insert({ id, name, description: desc, color });
-  if (error) { showToast('Failed: ' + error.message, true); return; }
-  await loadProjects();
-  currentProjectId = id;
-  renderProjectTabs();
-  closeProjectModal();
-  await loadAll();
-  showToast('✓ Project created: ' + name);
-}
-
-// ─── INNER TABS ──────────────────────────────────────────────────
-function switchInnerTab(tab) {
-  currentInnerTab = tab;
-  document.getElementById('tabAssemblies').classList.toggle('active', tab === 'assemblies');
-  document.getElementById('tabWirePulls').classList.toggle('active', tab === 'wirepulls');
-  document.getElementById('viewAssemblies').style.display = tab === 'assemblies' ? 'block' : 'none';
-  document.getElementById('viewWirePulls').style.display = tab === 'wirepulls' ? 'block' : 'none';
-}
-
-// ─── LOAD ALL ────────────────────────────────────────────────────
+// ─── LOAD DATA ───────────────────────────────────────────────────
 async function loadAll() {
-  document.getElementById('loadingText').textContent = 'Loading...';
-  const [asmRes, wpRes] = await Promise.all([
-    sb.from('assemblies').select('*').eq('project_id', currentProjectId).order('created_at', {ascending:true}),
-    sb.from('wire_pulls').select('*').eq('project_id', currentProjectId).order('panel_name', {ascending:true})
-  ]);
-  if (!asmRes.error) assemblies = asmRes.data.map(dbToLocal);
-  if (!wpRes.error) wirePulls = wpRes.data.map(dbToWp);
-  render();
-  renderWirePulls();
+  const { data, error } = await sb.from('assemblies').select('*').order('created_at', { ascending: true });
+  if (error) throw error;
+  assemblies = data.map(dbToLocal);
   loadDrawings();
+  render();
 }
 
-async function loadWirePulls() {
-  const { data, error } = await sb.from('wire_pulls').select('*').eq('project_id', currentProjectId).order('panel_name', {ascending:true});
-  if (!error) { wirePulls = data.map(dbToWp); renderWirePulls(); }
-}
-
-// ─── DATA MAPPING ────────────────────────────────────────────────
 function dbToLocal(r) {
   return {
-    id: r.id, spoolId: r.spool_id||'', packageId: r.package_id||'',
-    lbsId: r.lbs_id||'', releaseDate: r.release_date||'',
-    prefabDone: r.prefab_done||false, shipDate: r.ship_date||'',
-    installed: r.installed||false, sheetNumber: r.sheet_number||'',
-    drawingUrl: r.drawing_url||'', projectId: r.project_id||''
+    id: r.id,
+    spoolId: r.spool_id || '',
+    packageId: r.package_id || '',
+    lbsId: r.lbs_id || '',
+    releaseDate: r.release_date || '',
+    prefabDone: r.prefab_done || false,
+    shipDate: r.ship_date || '',
+    installed: r.installed || false,
+    sheetNumber: r.sheet_number || '',
+    drawingUrl: r.drawing_url || ''
   };
 }
+
 function localToDb(a) {
   return {
     spool_id: a.spoolId, package_id: a.packageId, lbs_id: a.lbsId,
-    release_date: a.releaseDate||null, prefab_done: a.prefabDone,
-    ship_date: a.shipDate||null, installed: a.installed,
-    sheet_number: a.sheetNumber, drawing_url: a.drawingUrl||'',
-    project_id: currentProjectId
+    release_date: a.releaseDate || null, prefab_done: a.prefabDone,
+    ship_date: a.shipDate || null, installed: a.installed,
+    sheet_number: a.sheetNumber, drawing_url: a.drawingUrl || ''
   };
 }
-function dbToWp(r) {
-  return { id: r.id, panelName: r.panel_name||'', status: r.status||'released', drawingUrl: r.drawing_url||'', notes: r.notes||'', projectId: r.project_id||'' };
-}
 
-// ─── RENDER ASSEMBLIES ───────────────────────────────────────────
+// ─── RENDER ──────────────────────────────────────────────────────
 function render() { applyFilters(); updateStats(); updateBreakdown(); }
 
 function applyFilters() {
@@ -858,19 +535,13 @@ function applyFilters() {
     if (search && !a.spoolId.toLowerCase().includes(search) && !a.packageId.toLowerCase().includes(search) && !a.lbsId.toLowerCase().includes(search)) return false;
     if (pkg && a.packageId !== pkg) return false;
     if (lbs && a.lbsId !== lbs) return false;
-    if (status) {
-      const s = getStatus(a);
-      if (status === 'installed' && s !== 'installed') return false;
-      if (status === 'shipped' && s !== 'shipped') return false;
-      if (status === 'released' && s !== 'released') return false;
-    }
+    if (status) { const s = getStatus(a); if (s !== status) return false; }
     return true;
   });
 
-  // Sort
-  filteredRows.sort((a,b) => {
-    let av = a[sortKey.replace(/_([a-z])/g,(_,c)=>c.toUpperCase())] || '';
-    let bv = b[sortKey.replace(/_([a-z])/g,(_,c)=>c.toUpperCase())] || '';
+  filteredRows.sort((a, b) => {
+    const key = sortKey.replace(/_([a-z])/g, (_, c) => c.toUpperCase());
+    let av = a[key] || '', bv = b[key] || '';
     if (av < bv) return sortAsc ? -1 : 1;
     if (av > bv) return sortAsc ? 1 : -1;
     return 0;
@@ -893,51 +564,41 @@ function renderTable() {
   const empty = document.getElementById('emptyState');
   const table = document.getElementById('mainTable');
 
-  if (!filteredRows.length) {
-    empty.style.display = 'block';
-    table.style.display = 'none';
-    return;
-  }
-  empty.style.display = 'none';
-  table.style.display = 'table';
+  if (!filteredRows.length) { empty.style.display = 'block'; table.style.display = 'none'; return; }
+  empty.style.display = 'none'; table.style.display = 'table';
 
   tbody.innerHTML = filteredRows.map((a, idx) => {
     const status = getStatus(a);
-    const statusClass = 'status-' + status;
     const checked = selectedIds.has(a.id);
     const hasDrawing = !!a.drawingUrl;
-    return `<tr data-id="${a.id}" data-idx="${idx}" onclick="rowClick(event,${idx})" style="${checked?'background:rgba(10,74,124,0.06)':''}">
-      <td class="col-select" onclick="event.stopPropagation()"><input type="checkbox" class="row-check" ${checked?'checked':''} onchange="toggleRow('${a.id}',this.checked,${idx})"></td>
+    return `<tr data-id="${a.id}" data-idx="${idx}" onclick="rowClick(event,${idx})" style="${checked ? 'background:rgba(10,74,124,0.06)' : ''}">
+      <td class="col-select" onclick="event.stopPropagation()"><input type="checkbox" class="row-check" ${checked ? 'checked' : ''} onchange="toggleRow('${a.id}',this.checked,${idx})"></td>
       <td style="font-family:var(--mono);font-size:12px;font-weight:600;">${a.spoolId}</td>
       <td style="font-size:12px;max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${a.packageId}</td>
       <td style="font-size:12px;">${a.lbsId}</td>
       <td style="font-family:var(--mono);font-size:11px;">${a.releaseDate || '<span style="color:var(--text-dim)">—</span>'}</td>
       <td style="text-align:center">
         ${isEditor
-          ? `<div class="check-cell"><div class="check-box ${a.prefabDone?'checked':''}" onclick="toggleField('${a.id}','prefabDone',${!a.prefabDone});event.stopPropagation()"></div></div>`
-          : `<div class="check-cell"><div class="check-box ${a.prefabDone?'checked':''}" style="cursor:default;opacity:0.7;"></div></div>`
-        }
+          ? `<div class="check-cell"><div class="check-box ${a.prefabDone ? 'checked' : ''}" onclick="toggleField('${a.id}','prefabDone',${!a.prefabDone});event.stopPropagation()"></div></div>`
+          : `<div class="check-cell"><div class="check-box ${a.prefabDone ? 'checked' : ''}" style="cursor:default;opacity:0.7;"></div></div>`}
       </td>
       <td>
         ${isEditor
-          ? `<input type="date" value="${a.shipDate||''}" onchange="updateField('${a.id}','shipDate',this.value)" onclick="event.stopPropagation()" style="font-family:var(--mono);font-size:11px;background:transparent;border:none;color:${a.shipDate?'var(--text)':'var(--text-dim)'};cursor:pointer;outline:none;">`
-          : `<span style="font-family:var(--mono);font-size:11px;">${a.shipDate||'<span style="color:var(--text-dim)">—</span>'}</span>`
-        }
+          ? `<input type="date" value="${a.shipDate || ''}" onchange="updateField('${a.id}','shipDate',this.value)" onclick="event.stopPropagation()" style="font-family:var(--mono);font-size:11px;background:transparent;border:none;color:${a.shipDate ? 'var(--text)' : 'var(--text-dim)'};cursor:pointer;outline:none;">`
+          : `<span style="font-family:var(--mono);font-size:11px;">${a.shipDate || '<span style="color:var(--text-dim)">—</span>'}</span>`}
       </td>
       <td style="text-align:center">
         ${isEditor
-          ? `<div class="check-cell"><div class="check-box ${a.installed?'checked':''}" onclick="toggleField('${a.id}','installed',${!a.installed});event.stopPropagation()"></div></div>`
-          : `<div class="check-cell"><div class="check-box ${a.installed?'checked':''}" style="cursor:default;opacity:0.7;"></div></div>`
-        }
+          ? `<div class="check-cell"><div class="check-box ${a.installed ? 'checked' : ''}" onclick="toggleField('${a.id}','installed',${!a.installed});event.stopPropagation()"></div></div>`
+          : `<div class="check-cell"><div class="check-box ${a.installed ? 'checked' : ''}" style="cursor:default;opacity:0.7;"></div></div>`}
       </td>
-      <td style="font-family:var(--mono);font-size:11px;">${a.sheetNumber||'<span style="color:var(--text-dim)">—</span>'}</td>
+      <td style="font-family:var(--mono);font-size:11px;">${a.sheetNumber || '<span style="color:var(--text-dim)">—</span>'}</td>
       <td>
         ${hasDrawing
           ? `<a href="${a.drawingUrl}" target="_blank" class="drawing-btn has-link">📄 Open</a>`
-          : `<span class="drawing-btn">📄 —</span>`
-        }
+          : `<span class="drawing-btn">📄 —</span>`}
       </td>
-      <td><span class="status-badge ${statusClass}">${status}</span></td>
+      <td><span class="status-badge status-${status}">${status}</span></td>
       <td onclick="event.stopPropagation()">
         ${isEditor ? `<button class="btn btn-danger" style="padding:3px 8px;font-size:10px;clip-path:none;" onclick="deleteRow('${a.id}')">✕</button>` : ''}
       </td>
@@ -951,7 +612,7 @@ function updateStats() {
   const prefab = assemblies.filter(a => a.prefabDone).length;
   const shipped = assemblies.filter(a => a.shipDate).length;
   const installed = assemblies.filter(a => a.installed).length;
-  const pct = n => total ? Math.round(n/total*100)+'%' : '0%';
+  const pct = n => total ? Math.round(n / total * 100) + '%' : '0%';
 
   document.getElementById('statTotal').textContent = total;
   document.getElementById('statReleased').textContent = released;
@@ -963,40 +624,40 @@ function updateStats() {
   document.getElementById('statInstalled').textContent = installed;
   document.getElementById('statInstalledPct').textContent = pct(installed);
 
-  const set = (id, val) => { document.getElementById(id).style.width = pct(val); document.getElementById(id.replace('pb-','pp-')).textContent = pct(val); };
-  set('pb-released', released); set('pb-prefab', prefab); set('pb-shipped', shipped); set('pb-installed', installed);
+  const setBar = (id, val) => {
+    document.getElementById('pb-' + id).style.width = pct(val);
+    document.getElementById('pp-' + id).textContent = pct(val);
+  };
+  setBar('released', released); setBar('prefab', prefab);
+  setBar('shipped', shipped); setBar('installed', installed);
 }
 
 function updateFilterDropdowns() {
   const pkgSel = document.getElementById('filterPackage');
   const lbsSel = document.getElementById('filterLBS');
-  const pkgVal = pkgSel.value;
-  const lbsVal = lbsSel.value;
-
+  const pkgVal = pkgSel.value, lbsVal = lbsSel.value;
   const pkgs = [...new Set(assemblies.map(a => a.packageId).filter(Boolean))].sort();
   const lbss = [...new Set(assemblies.map(a => a.lbsId).filter(Boolean))].sort();
-
-  pkgSel.innerHTML = '<option value="">All</option>' + pkgs.map(p => `<option value="${p}" ${p===pkgVal?'selected':''}>${p}</option>`).join('');
-  lbsSel.innerHTML = '<option value="">All</option>' + lbss.map(l => `<option value="${l}" ${l===lbsVal?'selected':''}>${l}</option>`).join('');
+  pkgSel.innerHTML = '<option value="">All</option>' + pkgs.map(p => `<option value="${p}" ${p === pkgVal ? 'selected' : ''}>${p}</option>`).join('');
+  lbsSel.innerHTML = '<option value="">All</option>' + lbss.map(l => `<option value="${l}" ${l === lbsVal ? 'selected' : ''}>${l}</option>`).join('');
 }
 
 function updateBreakdown() {
-  const byPkg = {};
-  const byLbs = {};
+  const byPkg = {}, byLbs = {};
   assemblies.forEach(a => {
-    if (a.packageId) { if (!byPkg[a.packageId]) byPkg[a.packageId]={total:0,installed:0}; byPkg[a.packageId].total++; if(a.installed) byPkg[a.packageId].installed++; }
-    if (a.lbsId) { if (!byLbs[a.lbsId]) byLbs[a.lbsId]={total:0,installed:0}; byLbs[a.lbsId].total++; if(a.installed) byLbs[a.lbsId].installed++; }
+    if (a.packageId) { if (!byPkg[a.packageId]) byPkg[a.packageId] = { total: 0, installed: 0 }; byPkg[a.packageId].total++; if (a.installed) byPkg[a.packageId].installed++; }
+    if (a.lbsId) { if (!byLbs[a.lbsId]) byLbs[a.lbsId] = { total: 0, installed: 0 }; byLbs[a.lbsId].total++; if (a.installed) byLbs[a.lbsId].installed++; }
   });
-  const render = (obj, elId) => {
+  const renderBreakdown = (obj, elId) => {
     const el = document.getElementById(elId);
-    const sorted = Object.entries(obj).sort((a,b)=>b[1].total-a[1].total);
-    el.innerHTML = sorted.map(([k,v]) => {
-      const pct = v.total ? Math.round(v.installed/v.total*100) : 0;
-      return `<div class="breakdown-row"><div class="breakdown-name" title="${k}">${k}</div><div class="breakdown-bar-wrap"><div class="breakdown-bar-fill" style="width:${pct}%"></div></div><div class="breakdown-stat">${v.installed}/${v.total} · ${pct}%</div></div>`;
+    const sorted = Object.entries(obj).sort((a, b) => b[1].total - a[1].total);
+    el.innerHTML = sorted.map(([k, v]) => {
+      const p = v.total ? Math.round(v.installed / v.total * 100) : 0;
+      return `<div class="breakdown-row"><div class="breakdown-name" title="${k}">${k}</div><div class="breakdown-bar-wrap"><div class="breakdown-bar-fill" style="width:${p}%"></div></div><div class="breakdown-stat">${v.installed}/${v.total} · ${p}%</div></div>`;
     }).join('') || '<div style="font-family:var(--mono);font-size:11px;color:var(--text-dim);padding:8px 0;">No data</div>';
   };
-  render(byPkg, 'breakdownPackage');
-  render(byLbs, 'breakdownLBS');
+  renderBreakdown(byPkg, 'breakdownPackage');
+  renderBreakdown(byLbs, 'breakdownLBS');
 }
 
 // ─── SELECTION ───────────────────────────────────────────────────
@@ -1010,15 +671,12 @@ function rowClick(e, idx) {
     const id = filteredRows[idx].id;
     if (selectedIds.has(id)) selectedIds.delete(id); else selectedIds.add(id);
   } else {
-    selectedIds.clear();
-    selectedIds.add(filteredRows[idx].id);
+    selectedIds.clear(); selectedIds.add(filteredRows[idx].id);
   }
-  lastSelectedIdx = idx;
-  updateBulkToolbar();
-  renderTable();
+  lastSelectedIdx = idx; updateBulkToolbar(); renderTable();
 }
-function toggleRow(id, checked, idx) { if(checked) selectedIds.add(id); else selectedIds.delete(id); lastSelectedIdx=idx; updateBulkToolbar(); renderTable(); }
-function toggleSelectAll(checked) { if(checked) filteredRows.forEach(a=>selectedIds.add(a.id)); else selectedIds.clear(); updateBulkToolbar(); renderTable(); }
+function toggleRow(id, checked, idx) { if (checked) selectedIds.add(id); else selectedIds.delete(id); lastSelectedIdx = idx; updateBulkToolbar(); renderTable(); }
+function toggleSelectAll(checked) { if (checked) filteredRows.forEach(a => selectedIds.add(a.id)); else selectedIds.clear(); updateBulkToolbar(); renderTable(); }
 function clearSelection() { selectedIds.clear(); updateBulkToolbar(); renderTable(); }
 function updateBulkToolbar() {
   const tb = document.getElementById('bulkToolbar');
@@ -1027,38 +685,42 @@ function updateBulkToolbar() {
   else tb.classList.remove('visible');
 }
 
-// ─── CRUD ASSEMBLIES ─────────────────────────────────────────────
+// ─── CRUD ────────────────────────────────────────────────────────
 async function toggleField(id, field, val) {
   const a = assemblies.find(x => x.id === id); if (!a) return;
-  a[field] = val;
-  renderTable(); updateStats();
-  const col = field === 'prefabDone' ? 'prefab_done' : field === 'installed' ? 'installed' : field;
-  await sb.from('assemblies').update({[col]:val}).eq('id',id);
+  a[field] = val; renderTable(); updateStats();
+  const col = field === 'prefabDone' ? 'prefab_done' : 'installed';
+  await sb.from('assemblies').update({ [col]: val }).eq('id', id);
 }
 async function updateField(id, field, val) {
   const a = assemblies.find(x => x.id === id); if (!a) return;
-  a[field] = val;
-  renderTable(); updateStats();
-  const col = field === 'shipDate' ? 'ship_date' : field === 'releaseDate' ? 'release_date' : field;
-  await sb.from('assemblies').update({[col]:val||null}).eq('id',id);
+  a[field] = val; renderTable(); updateStats();
+  const col = field === 'shipDate' ? 'ship_date' : 'release_date';
+  await sb.from('assemblies').update({ [col]: val || null }).eq('id', id);
 }
 function openAddModal() { document.getElementById('addModalOverlay').classList.add('open'); }
-function closeModal() { document.getElementById('addModalOverlay').classList.remove('open'); ['f_spoolId','f_packageId','f_lbsId','f_sheetNumber','f_releaseDate','f_shipDate'].forEach(id=>{document.getElementById(id).value='';}); }
+function closeModal() {
+  document.getElementById('addModalOverlay').classList.remove('open');
+  ['f_spoolId', 'f_packageId', 'f_lbsId', 'f_sheetNumber', 'f_releaseDate', 'f_shipDate'].forEach(id => { document.getElementById(id).value = ''; });
+}
 async function addRow() {
   const spoolId = document.getElementById('f_spoolId').value.trim();
   if (!spoolId) { showToast('Spool ID required', true); return; }
-  const row = { spool_id:spoolId, package_id:document.getElementById('f_packageId').value.trim(), lbs_id:document.getElementById('f_lbsId').value.trim(), sheet_number:document.getElementById('f_sheetNumber').value.trim(), release_date:document.getElementById('f_releaseDate').value||null, ship_date:document.getElementById('f_shipDate').value||null, prefab_done:false, installed:false, drawing_url:'', project_id:currentProjectId };
-  const {data,error} = await sb.from('assemblies').insert(row).select();
-  if (error) { showToast('Error: '+error.message,true); return; }
-  assemblies.unshift(dbToLocal(data[0]));
-  closeModal(); render(); showToast('✓ Assembly added');
+  const row = {
+    spool_id: spoolId, package_id: document.getElementById('f_packageId').value.trim(),
+    lbs_id: document.getElementById('f_lbsId').value.trim(), sheet_number: document.getElementById('f_sheetNumber').value.trim(),
+    release_date: document.getElementById('f_releaseDate').value || null, ship_date: document.getElementById('f_shipDate').value || null,
+    prefab_done: false, installed: false, drawing_url: ''
+  };
+  const { data, error } = await sb.from('assemblies').insert(row).select();
+  if (error) { showToast('Error: ' + error.message, true); return; }
+  assemblies.unshift(dbToLocal(data[0])); closeModal(); render(); showToast('✓ Assembly added');
 }
 async function deleteRow(id) {
   if (!confirm('Delete this assembly?')) return;
-  assemblies = assemblies.filter(a=>a.id!==id);
-  selectedIds.delete(id);
+  assemblies = assemblies.filter(a => a.id !== id); selectedIds.delete(id);
   render(); updateBulkToolbar();
-  await sb.from('assemblies').delete().eq('id',id);
+  await sb.from('assemblies').delete().eq('id', id);
   showToast('Assembly deleted');
 }
 
@@ -1081,272 +743,190 @@ async function applyBulkEdit() {
   if (inst !== 'no-change') updates.installed = inst === 'true';
   if (!Object.keys(updates).length) { closeBulkModal(); return; }
   const ids = [...selectedIds];
-  setSync('syncing','Saving...');
-  const {error} = await sb.from('assemblies').update(updates).in('id',ids);
-  if (error) { showToast('Error: '+error.message,true); setSync('error','Failed'); return; }
-  ids.forEach(id => { const a=assemblies.find(x=>x.id===id); if(a){ if(updates.release_date!==undefined) a.releaseDate=updates.release_date; if(updates.ship_date!==undefined) a.shipDate=updates.ship_date; if(updates.prefab_done!==undefined) a.prefabDone=updates.prefab_done; if(updates.installed!==undefined) a.installed=updates.installed; } });
-  closeBulkModal(); clearSelection(); render(); setSync('connected','Live · All users synced');
-  showToast('✓ Updated '+ids.length+' assemblies');
+  setSync('syncing', 'Saving...');
+  const { error } = await sb.from('assemblies').update(updates).in('id', ids);
+  if (error) { showToast('Error: ' + error.message, true); setSync('error', 'Failed'); return; }
+  ids.forEach(id => {
+    const a = assemblies.find(x => x.id === id);
+    if (a) {
+      if (updates.release_date !== undefined) a.releaseDate = updates.release_date;
+      if (updates.ship_date !== undefined) a.shipDate = updates.ship_date;
+      if (updates.prefab_done !== undefined) a.prefabDone = updates.prefab_done;
+      if (updates.installed !== undefined) a.installed = updates.installed;
+    }
+  });
+  closeBulkModal(); clearSelection(); render();
+  setSync('connected', 'Live · All users synced');
+  showToast('✓ Updated ' + ids.length + ' assemblies');
 }
 async function bulkDelete() {
   if (!selectedIds.size) return;
-  if (!confirm('Delete '+selectedIds.size+' assemblies?')) return;
+  if (!confirm('Delete ' + selectedIds.size + ' assemblies?')) return;
   const ids = [...selectedIds];
-  await sb.from('assemblies').delete().in('id',ids);
-  assemblies = assemblies.filter(a=>!selectedIds.has(a.id));
+  await sb.from('assemblies').delete().in('id', ids);
+  assemblies = assemblies.filter(a => !selectedIds.has(a.id));
   selectedIds.clear(); updateBulkToolbar(); render();
-  showToast('Deleted '+ids.length+' assemblies');
+  showToast('Deleted ' + ids.length + ' assemblies');
 }
-
 function clearFilters() {
-  document.getElementById('searchInput').value='';
-  document.getElementById('filterPackage').value='';
-  document.getElementById('filterLBS').value='';
-  document.getElementById('filterStatus').value='';
+  document.getElementById('searchInput').value = '';
+  document.getElementById('filterPackage').value = '';
+  document.getElementById('filterLBS').value = '';
+  document.getElementById('filterStatus').value = '';
   applyFilters();
 }
 
 // ─── CSV IMPORT ──────────────────────────────────────────────────
 function detectDelimiter(line) {
-  const tabs=((line||'').match(/\t/g)||[]).length;
-  const commas=((line||'').match(/,/g)||[]).length;
-  return tabs>commas?'\t':',';
+  const tabs = ((line || '').match(/\t/g) || []).length;
+  const commas = ((line || '').match(/,/g) || []).length;
+  return tabs > commas ? '\t' : ',';
 }
-function parseCSVLine(line,delim) {
-  const result=[]; let cur='',inQ=false;
-  for(let i=0;i<line.length;i++){
-    const c=line[i];
-    if(c==='"'){if(inQ&&line[i+1]==='"'){cur+='"';i++;}else inQ=!inQ;}
-    else if(c===delim&&!inQ){result.push(cur);cur='';}
-    else cur+=c;
+function parseCSVLine(line, delim) {
+  const result = []; let cur = '', inQ = false;
+  for (let i = 0; i < line.length; i++) {
+    const c = line[i];
+    if (c === '"') { if (inQ && line[i + 1] === '"') { cur += '"'; i++; } else inQ = !inQ; }
+    else if (c === delim && !inQ) { result.push(cur); cur = ''; }
+    else cur += c;
   }
-  result.push(cur);
-  return result;
+  result.push(cur); return result;
 }
-function autoMapIdx(headers,patterns){
-  const norm=headers.map(h=>h.toLowerCase().replace(/[\s_\-\.]/g,''));
-  for(const p of patterns){const i=norm.findIndex(h=>h.includes(p));if(i>=0)return i;}
+function autoMapIdx(headers, patterns) {
+  const norm = headers.map(h => h.toLowerCase().replace(/[\s_\-\.]/g, ''));
+  for (const p of patterns) { const i = norm.findIndex(h => h.includes(p)); if (i >= 0) return i; }
   return -1;
 }
-document.getElementById('csvFile').addEventListener('change',function(e){
-  const file=e.target.files[0];if(!file)return;
-  const reader=new FileReader();
-  reader.onload=function(ev){
-    let raw=ev.target.result.replace(/^\uFEFF/,'').replace(/\r\n/g,'\n').replace(/\r/g,'\n');
-    let lines=raw.split('\n');
-    const nonBlank=lines.find(l=>l.replace(/,/g,'').trim());
-    const delim=detectDelimiter(nonBlank||lines[0]);
-    let hIdx=-1;
-    for(let i=0;i<Math.min(8,lines.length);i++){
-      const cols=parseCSVLine(lines[i],delim).map(c=>c.replace(/^\uFEFF/,'').toLowerCase().replace(/[\s_]/g,''));
-      if(cols.some(c=>c.includes('spoolid')||c.includes('packageid')||c.includes('lbsid'))){hIdx=i;break;}
+document.getElementById('csvFile').addEventListener('change', function(e) {
+  const file = e.target.files[0]; if (!file) return;
+  const reader = new FileReader();
+  reader.onload = function(ev) {
+    let raw = ev.target.result.replace(/^\uFEFF/, '').replace(/\r\n/g, '\n').replace(/\r/g, '\n');
+    let lines = raw.split('\n');
+    const nonBlank = lines.find(l => l.replace(/,/g, '').trim());
+    const delim = detectDelimiter(nonBlank || lines[0]);
+    let hIdx = -1;
+    for (let i = 0; i < Math.min(8, lines.length); i++) {
+      const cols = parseCSVLine(lines[i], delim).map(c => c.replace(/^\uFEFF/, '').toLowerCase().replace(/[\s_]/g, ''));
+      if (cols.some(c => c.includes('spoolid') || c.includes('packageid') || c.includes('lbsid'))) { hIdx = i; break; }
     }
-    if(hIdx===-1)hIdx=lines.findIndex(l=>l.trim()&&l.replace(/,/g,'').trim());
-    if(hIdx===-1){showToast('Could not detect headers',true);return;}
-    csvParsedHeaders=parseCSVLine(lines[hIdx],delim).map(h=>h.replace(/^"|"$/g,'').replace(/^\uFEFF/,'').trim());
-    csvParsedRows=[];
-    for(let i=hIdx+1;i<lines.length;i++){
-      const line=lines[i];if(!line.trim()||!line.replace(/,/g,'').trim())continue;
-      const cols=parseCSVLine(line,delim).map(c=>c.replace(/^"|"$/g,'').trim());
-      if(cols.every(c=>!c))continue;
+    if (hIdx === -1) hIdx = lines.findIndex(l => l.trim() && l.replace(/,/g, '').trim());
+    if (hIdx === -1) { showToast('Could not detect headers', true); return; }
+    csvParsedHeaders = parseCSVLine(lines[hIdx], delim).map(h => h.replace(/^"|"$/g, '').replace(/^\uFEFF/, '').trim());
+    csvParsedRows = [];
+    for (let i = hIdx + 1; i < lines.length; i++) {
+      const line = lines[i]; if (!line.trim() || !line.replace(/,/g, '').trim()) continue;
+      const cols = parseCSVLine(line, delim).map(c => c.replace(/^"|"$/g, '').trim());
+      if (cols.every(c => !c)) continue;
       csvParsedRows.push(cols);
     }
-    const autoMap={
-      spoolId:autoMapIdx(csvParsedHeaders,['evspoolid','spoolid','spool']),
-      packageId:autoMapIdx(csvParsedHeaders,['evpackageid','packageid','package']),
-      lbsId:autoMapIdx(csvParsedHeaders,['evlbsid','lbsid','lbs']),
-      releaseDate:autoMapIdx(csvParsedHeaders,['releasedate','release']),
-      prefabDone:autoMapIdx(csvParsedHeaders,['prefabdone','prefab']),
-      shipDate:autoMapIdx(csvParsedHeaders,['shipdate','shipped']),
-      installed:autoMapIdx(csvParsedHeaders,['installed','install']),
-      sheetNumber:autoMapIdx(csvParsedHeaders,['sheetnumber','sheetno','sheet']),
+    const autoMap = {
+      spoolId: autoMapIdx(csvParsedHeaders, ['evspoolid', 'spoolid', 'spool']),
+      packageId: autoMapIdx(csvParsedHeaders, ['evpackageid', 'packageid', 'package']),
+      lbsId: autoMapIdx(csvParsedHeaders, ['evlbsid', 'lbsid', 'lbs']),
+      releaseDate: autoMapIdx(csvParsedHeaders, ['releasedate', 'release']),
+      prefabDone: autoMapIdx(csvParsedHeaders, ['prefabdone', 'prefab']),
+      shipDate: autoMapIdx(csvParsedHeaders, ['shipdate', 'shipped']),
+      installed: autoMapIdx(csvParsedHeaders, ['installed', 'install']),
+      sheetNumber: autoMapIdx(csvParsedHeaders, ['sheetnumber', 'sheetno', 'sheet']),
     };
-    openMappingModal(autoMap,delim);
-    e.target.value='';
+    openMappingModal(autoMap, delim);
+    e.target.value = '';
   };
   reader.readAsText(file);
 });
-function openMappingModal(autoMap,delim){
-  const fields=[
-    {key:'spoolId',label:'Spool ID',required:true},{key:'packageId',label:'Package ID'},{key:'lbsId',label:'Location',required:true},
-    {key:'releaseDate',label:'Release Date'},{key:'prefabDone',label:'Prefab Done'},{key:'shipDate',label:'Ship Date'},
-    {key:'installed',label:'Installed'},{key:'sheetNumber',label:'Sheet Number'},
+function openMappingModal(autoMap, delim) {
+  const fields = [
+    { key: 'spoolId', label: 'Spool ID', required: true }, { key: 'packageId', label: 'Package ID' },
+    { key: 'lbsId', label: 'Location', required: true }, { key: 'releaseDate', label: 'Release Date' },
+    { key: 'prefabDone', label: 'Prefab Done' }, { key: 'shipDate', label: 'Ship Date' },
+    { key: 'installed', label: 'Installed' }, { key: 'sheetNumber', label: 'Sheet Number' },
   ];
-  const optHtml=['<option value="-1">— skip —</option>',...csvParsedHeaders.map((h,i)=>`<option value="${i}">${h}</option>`)].join('');
-  document.getElementById('mapModalBody').innerHTML=`
+  const optHtml = ['<option value="-1">— skip —</option>', ...csvParsedHeaders.map((h, i) => `<option value="${i}">${h}</option>`)].join('');
+  document.getElementById('mapModalBody').innerHTML = `
     <div style="font-family:var(--mono);font-size:11px;color:var(--text-dim);margin-bottom:16px;">
       <strong style="color:var(--accent)">${csvParsedHeaders.length} columns</strong>, <strong style="color:var(--accent)">${csvParsedRows.length} rows</strong>
-      · delimiter: <strong style="color:var(--accent2)">${delim==='\t'?'TAB':delim}</strong>
+      · delimiter: <strong style="color:var(--accent2)">${delim === '\t' ? 'TAB' : delim}</strong>
       <br><br>Headers: <span style="color:var(--text)">${csvParsedHeaders.join(' | ')}</span>
     </div>
-    <div class="form-grid">${fields.map(f=>`<div class="form-field"><label class="form-label">${f.label}${f.required?' <span style="color:var(--accent2)">*</span>':''}</label><select class="form-input" id="map_${f.key}">${optHtml}</select></div>`).join('')}</div>`;
-  fields.forEach(f=>{const sel=document.getElementById('map_'+f.key);if(sel&&autoMap[f.key]>=0)sel.value=autoMap[f.key];});
+    <div class="form-grid">${fields.map(f => `<div class="form-field"><label class="form-label">${f.label}${f.required ? ' <span style="color:var(--accent2)">*</span>' : ''}</label><select class="form-input" id="map_${f.key}">${optHtml}</select></div>`).join('')}</div>`;
+  fields.forEach(f => { const sel = document.getElementById('map_' + f.key); if (sel && autoMap[f.key] >= 0) sel.value = autoMap[f.key]; });
   document.getElementById('mapModalOverlay').classList.add('open');
 }
-async function confirmMapping(){
-  const getIdx=id=>parseInt(document.getElementById(id)?.value??'-1');
-  const map={spoolId:getIdx('map_spoolId'),packageId:getIdx('map_packageId'),lbsId:getIdx('map_lbsId'),releaseDate:getIdx('map_releaseDate'),prefabDone:getIdx('map_prefabDone'),shipDate:getIdx('map_shipDate'),installed:getIdx('map_installed'),sheetNumber:getIdx('map_sheetNumber')};
-  if(map.spoolId<0){showToast('Map Spool ID column',true);return;}
-  const existingIds=new Set(assemblies.map(a=>a.spoolId.toLowerCase().trim()));
-  const toInsert=[];let skipped=0;
-  csvParsedRows.forEach(cols=>{
-    const get=idx=>idx>=0&&idx<cols.length?cols[idx]:'';
-    const spoolId=get(map.spoolId),packageId=get(map.packageId),lbsId=get(map.lbsId);
-    if(!spoolId||(existingIds.has(spoolId.toLowerCase().trim()))){skipped++;return;}
-    const sheetNumber=get(map.sheetNumber);
-    toInsert.push({spool_id:spoolId,package_id:packageId,lbs_id:lbsId,release_date:get(map.releaseDate)||null,prefab_done:get(map.prefabDone).toLowerCase()==='true',ship_date:get(map.shipDate)||null,installed:get(map.installed).toLowerCase()==='true',sheet_number:sheetNumber,drawing_url:'',project_id:currentProjectId});
+async function confirmMapping() {
+  const getIdx = id => parseInt(document.getElementById(id)?.value ?? '-1');
+  const map = {
+    spoolId: getIdx('map_spoolId'), packageId: getIdx('map_packageId'), lbsId: getIdx('map_lbsId'),
+    releaseDate: getIdx('map_releaseDate'), prefabDone: getIdx('map_prefabDone'),
+    shipDate: getIdx('map_shipDate'), installed: getIdx('map_installed'), sheetNumber: getIdx('map_sheetNumber'),
+  };
+  if (map.spoolId < 0) { showToast('Map Spool ID column', true); return; }
+  const existingIds = new Set(assemblies.map(a => a.spoolId.toLowerCase().trim()));
+  const toInsert = []; let skipped = 0;
+  csvParsedRows.forEach(cols => {
+    const get = idx => idx >= 0 && idx < cols.length ? cols[idx] : '';
+    const spoolId = get(map.spoolId);
+    if (!spoolId || existingIds.has(spoolId.toLowerCase().trim())) { skipped++; return; }
+    toInsert.push({
+      spool_id: spoolId, package_id: get(map.packageId), lbs_id: get(map.lbsId),
+      release_date: get(map.releaseDate) || null, prefab_done: get(map.prefabDone).toLowerCase() === 'true',
+      ship_date: get(map.shipDate) || null, installed: get(map.installed).toLowerCase() === 'true',
+      sheet_number: get(map.sheetNumber), drawing_url: ''
+    });
   });
-  if(!toInsert.length){showToast('No new rows to import ('+skipped+' skipped as duplicates)',false);document.getElementById('mapModalOverlay').classList.remove('open');return;}
-  setSync('syncing','Importing '+toInsert.length+' rows...');
-  const BATCH=100;
-  for(let i=0;i<toInsert.length;i+=BATCH){
-    const {error}=await sb.from('assemblies').insert(toInsert.slice(i,i+BATCH));
-    if(error){showToast('Import error: '+error.message,true);setSync('error','Failed');return;}
+  if (!toInsert.length) { showToast('No new rows to import (' + skipped + ' skipped)', false); document.getElementById('mapModalOverlay').classList.remove('open'); return; }
+  setSync('syncing', 'Importing ' + toInsert.length + ' rows...');
+  const BATCH = 100;
+  for (let i = 0; i < toInsert.length; i += BATCH) {
+    const { error } = await sb.from('assemblies').insert(toInsert.slice(i, i + BATCH));
+    if (error) { showToast('Import error: ' + error.message, true); setSync('error', 'Failed'); return; }
   }
   document.getElementById('mapModalOverlay').classList.remove('open');
-  const {data}=await sb.from('assemblies').select('*').eq('project_id',currentProjectId).order('created_at',{ascending:true});
-  assemblies=data.map(dbToLocal);
-  render();
-  setSync('connected','Live · All users synced');
-  showToast('✓ Imported '+toInsert.length+' assemblies · '+skipped+' skipped');
+  const { data } = await sb.from('assemblies').select('*').order('created_at', { ascending: true });
+  assemblies = data.map(dbToLocal);
+  render(); setSync('connected', 'Live · All users synced');
+  showToast('✓ Imported ' + toInsert.length + ' assemblies · ' + skipped + ' skipped');
+}
+function exportCSV() {
+  const headers = ['Spool ID', 'Package ID', 'Location', 'Release Date', 'Prefab Done', 'Ship Date', 'Installed', 'Sheet Number'];
+  const rows = assemblies.map(a => [a.spoolId, a.packageId, a.lbsId, a.releaseDate, a.prefabDone, a.shipDate, a.installed, a.sheetNumber].map(v => '"' + (v ?? '') + '"').join(','));
+  const csv = [headers.join(','), ...rows].join('\n');
+  const a = document.createElement('a'); a.href = 'data:text/csv;charset=utf-8,' + encodeURIComponent(csv); a.download = 'prefab_assemblies.csv'; a.click();
 }
 
-function exportCSV(){
-  const headers=['Spool ID','Package ID','Location','Release Date','Prefab Done','Ship Date','Installed','Sheet Number'];
-  const rows=assemblies.map(a=>[a.spoolId,a.packageId,a.lbsId,a.releaseDate,a.prefabDone,a.shipDate,a.installed,a.sheetNumber].map(v=>'"'+(v??'')+'"').join(','));
-  const csv=[headers.join(','),...rows].join('\n');
-  const a=document.createElement('a');a.href='data:text/csv;charset=utf-8,'+encodeURIComponent(csv);a.download='prefab_assemblies.csv';a.click();
-}
-
-// ─── WIRE PULLS ──────────────────────────────────────────────────
-function renderWirePulls() {
-  const search = document.getElementById('wpSearchInput').value.toLowerCase();
-  const statusFilter = document.getElementById('wpFilterStatus').value;
-  let filtered = wirePulls.filter(w => {
-    if (search && !w.panelName.toLowerCase().includes(search)) return false;
-    if (statusFilter && w.status !== statusFilter) return false;
-    return true;
+// ─── PDF DRAWINGS ────────────────────────────────────────────────
+function loadDrawings() {
+  uploadedDrawings = [];
+  const seen = new Set();
+  assemblies.forEach(a => {
+    if (a.sheetNumber && a.drawingUrl && !seen.has(a.sheetNumber)) {
+      seen.add(a.sheetNumber);
+      uploadedDrawings.push({ sheetNumber: a.sheetNumber, url: a.drawingUrl });
+    }
   });
-  filtered.sort((a,b)=>{
-    let av=a[wpSortKey]||'',bv=b[wpSortKey]||'';
-    return wpSortAsc?(av<bv?-1:av>bv?1:0):(av<bv?1:av>bv?-1:0);
-  });
-  document.getElementById('wpShowingCount').textContent = filtered.length;
-  document.getElementById('wpTotalCount').textContent = wirePulls.length;
-  const tbody = document.getElementById('wpTableBody');
-  const empty = document.getElementById('wpEmptyState');
-  const table = document.getElementById('wpTable');
-  if (!filtered.length) { empty.style.display='block'; table.style.display='none'; }
-  else {
-    empty.style.display='none'; table.style.display='table';
-    tbody.innerHTML = filtered.map(w => `
-      <tr>
-        <td style="font-family:var(--mono);font-size:12px;font-weight:600;">${w.panelName}</td>
-        <td>
-          ${isEditor
-            ? `<select class="wp-status-select" onchange="updateWpStatus('${w.id}',this.value)">
-                <option value="released" ${w.status==='released'?'selected':''}>Released</option>
-                <option value="shipped" ${w.status==='shipped'?'selected':''}>Shipped</option>
-                <option value="pulled" ${w.status==='pulled'?'selected':''}>Pulled</option>
-                <option value="terminated" ${w.status==='terminated'?'selected':''}>Terminated</option>
-               </select>`
-            : `<span class="status-badge status-${w.status}">${w.status}</span>`
-          }
-        </td>
-        <td>
-          ${w.drawingUrl
-            ? `<a href="${w.drawingUrl}" target="_blank" class="drawing-btn has-link">📄 Open</a>`
-            : `<span class="drawing-btn">📄 —</span>`
-          }
-        </td>
-        <td style="font-size:12px;color:var(--text-dim);">${w.notes||'—'}</td>
-        <td>
-          ${isEditor ? `<button class="btn btn-danger" style="padding:3px 8px;font-size:10px;clip-path:none;" onclick="deleteWp('${w.id}')">✕</button>` : ''}
-        </td>
-      </tr>`).join('');
-  }
-  updateWpStats();
-}
-
-function updateWpStats() {
-  const total = wirePulls.length;
-  const counts = {released:0,shipped:0,pulled:0,terminated:0};
-  wirePulls.forEach(w => { if(counts[w.status]!==undefined) counts[w.status]++; });
-  const pct = n => total ? Math.round(n/total*100)+'%' : '0%';
-  document.getElementById('wpStatTotal').textContent = total;
-  Object.keys(counts).forEach(k => {
-    document.getElementById('wpStat'+k.charAt(0).toUpperCase()+k.slice(1)).textContent = counts[k];
-    document.getElementById('wpStat'+k.charAt(0).toUpperCase()+k.slice(1)+'Pct').textContent = pct(counts[k]);
-    document.getElementById('wpb-'+k).style.width = pct(counts[k]);
-    document.getElementById('wpp-'+k).textContent = pct(counts[k]);
-  });
-  document.getElementById('wpPdfCount').textContent = wirePulls.filter(w=>w.drawingUrl).length ? '('+wirePulls.filter(w=>w.drawingUrl).length+' PDFs)' : '';
-}
-
-async function updateWpStatus(id, status) {
-  wirePulls.find(w=>w.id===id).status = status;
-  renderWirePulls();
-  await sb.from('wire_pulls').update({status}).eq('id',id);
-  showToast('✓ Status updated');
-}
-
-function openAddWpModal() { document.getElementById('wpModalOverlay').classList.add('open'); }
-function closeWpModal() { document.getElementById('wpModalOverlay').classList.remove('open'); document.getElementById('wp_panelName').value=''; document.getElementById('wp_notes').value=''; }
-
-async function addWirePull() {
-  const panelName = document.getElementById('wp_panelName').value.trim();
-  if (!panelName) { showToast('Panel name required', true); return; }
-  const status = document.getElementById('wp_status').value;
-  const notes = document.getElementById('wp_notes').value.trim();
-  const {data,error} = await sb.from('wire_pulls').insert({panel_name:panelName,status,notes,project_id:currentProjectId,drawing_url:''}).select();
-  if (error) { showToast('Error: '+error.message,true); return; }
-  wirePulls.push(dbToWp(data[0]));
-  closeWpModal(); renderWirePulls(); showToast('✓ Panel added');
-}
-
-async function deleteWp(id) {
-  if (!confirm('Delete this wire pull?')) return;
-  wirePulls = wirePulls.filter(w=>w.id!==id);
-  renderWirePulls();
-  await sb.from('wire_pulls').delete().eq('id',id);
-  showToast('Wire pull deleted');
-}
-
-function clearWpFilters() {
-  document.getElementById('wpSearchInput').value='';
-  document.getElementById('wpFilterStatus').value='';
-  renderWirePulls();
-}
-
-// ─── PDF UPLOADS ─────────────────────────────────────────────────
-let uploadedDrawings = [];
-
-async function loadDrawings() {
-  uploadedDrawings = assemblies.filter(a=>a.drawingUrl).reduce((acc,a)=>{ if(!acc.find(d=>d.sheetNumber===a.sheetNumber)) acc.push({sheetNumber:a.sheetNumber,url:a.drawingUrl}); return acc; },[]);
   renderDrawingTable();
 }
 
 function toggleSheetManager() {
-  const body=document.getElementById('sheetManagerBody');
-  const toggle=document.getElementById('sheetManagerToggle');
-  const open=body.classList.toggle('open');
-  toggle.textContent=open?'▲ Hide':'▼ Show';
-}
-
-function toggleWpPdfSection() {
-  const body=document.getElementById('wpPdfBody');
-  const toggle=document.getElementById('wpPdfToggle');
-  const open=body.classList.toggle('open');
-  toggle.textContent=open?'▲ Hide':'▼ Show';
+  const body = document.getElementById('sheetManagerBody');
+  const toggle = document.getElementById('sheetManagerToggle');
+  const open = body.classList.toggle('open');
+  toggle.textContent = open ? '▲ Hide' : '▼ Show';
 }
 
 function renderDrawingTable() {
-  const wrap=document.getElementById('drawingTableWrap');
-  document.getElementById('sheetCount').textContent=uploadedDrawings.length?'('+uploadedDrawings.length+' drawings)':'';
-  if(!uploadedDrawings.length){wrap.innerHTML='<div class="sheet-empty">No drawings uploaded yet</div>';return;}
-  wrap.innerHTML=`<table class="sheet-table"><thead><tr><th>Sheet Number</th><th>File</th><th>Link</th><th>Action</th></tr></thead><tbody>
-    ${uploadedDrawings.map(d=>`<tr><td>${d.sheetNumber}</td><td style="font-family:var(--mono);font-size:10px;">${d.sheetNumber}.pdf</td><td><a href="${d.url}" target="_blank" style="color:var(--accent);font-size:10px;">📄 Open</a></td><td><button class="btn btn-danger" style="padding:3px 8px;font-size:10px;clip-path:none;" onclick="deleteDrawing('${d.sheetNumber}')">✕</button></td></tr>`).join('')}
-  </tbody></table>`;
+  const wrap = document.getElementById('drawingTableWrap');
+  const count = document.getElementById('sheetCount');
+  count.textContent = uploadedDrawings.length ? '(' + uploadedDrawings.length + ' drawings)' : '';
+  if (!uploadedDrawings.length) { wrap.innerHTML = '<div class="sheet-empty">No drawings uploaded yet</div>'; return; }
+  wrap.innerHTML = `<table class="sheet-table">
+    <thead><tr><th>Sheet Number</th><th>File</th><th>Link</th><th>Action</th></tr></thead>
+    <tbody>${uploadedDrawings.map(d => `<tr>
+      <td>${d.sheetNumber}</td>
+      <td style="font-family:var(--mono);font-size:10px;">${d.sheetNumber}.pdf</td>
+      <td><a href="${d.url}" target="_blank" style="color:var(--accent);font-size:10px;">📄 Open</a></td>
+      <td><button class="btn btn-danger" style="padding:3px 8px;font-size:10px;clip-path:none;" onclick="deleteDrawing('${d.sheetNumber}')">✕</button></td>
+    </tr>`).join('')}</tbody></table>`;
 }
 
 function handleDrawingDrop(e) {
@@ -1354,132 +934,75 @@ function handleDrawingDrop(e) {
   document.getElementById('drawingDropZone').classList.remove('drag-over');
   handleDrawingFiles(e.dataTransfer.files);
 }
-function handleWpDrop(e) {
-  e.preventDefault();
-  document.getElementById('wpDropZone').classList.remove('drag-over');
-  handleWpFiles(e.dataTransfer.files);
-}
 
 async function handleDrawingFiles(files) {
-  const pdfs=Array.from(files).filter(f=>f.name.toLowerCase().endsWith('.pdf'));
-  if(!pdfs.length){showToast('No PDF files found',true);return;}
-  await uploadPdfs(pdfs,'drawings',async(sheetNumber,url)=>{
-    await sb.from('assemblies').update({drawing_url:url}).eq('sheet_number',sheetNumber).eq('project_id',currentProjectId);
-    assemblies.forEach(a=>{if(a.sheetNumber===sheetNumber)a.drawingUrl=url;});
-    const ex=uploadedDrawings.findIndex(d=>d.sheetNumber===sheetNumber);
-    if(ex>=0)uploadedDrawings[ex].url=url; else uploadedDrawings.push({sheetNumber,url});
-  },'drawingUploadProgress','drawingProgressBar','drawingProgressLabel');
-  renderDrawingTable(); renderTable();
-}
+  const pdfs = Array.from(files).filter(f => f.name.toLowerCase().endsWith('.pdf'));
+  if (!pdfs.length) { showToast('No PDF files found', true); return; }
 
-async function handleWpFiles(files) {
-  const pdfs=Array.from(files).filter(f=>f.name.toLowerCase().endsWith('.pdf'));
-  if(!pdfs.length){showToast('No PDF files found',true);return;}
-  await uploadPdfs(pdfs,'wire pulls',async(panelName,url)=>{
-    // Check if panel already exists
-    const existing = wirePulls.find(w=>w.panelName.toLowerCase()===panelName.toLowerCase());
-    if(existing) {
-      // Update existing panel with new URL
-      await sb.from('wire_pulls').update({drawing_url:url}).eq('id',existing.id);
-      existing.drawingUrl=url;
-    } else {
-      // Auto-create new panel from PDF filename
-      const {data,error}=await sb.from('wire_pulls').insert({
-        panel_name:panelName,
-        status:'released',
-        drawing_url:url,
-        notes:'',
-        project_id:currentProjectId
-      }).select();
-      if(!error && data?.[0]) wirePulls.push(dbToWp(data[0]));
-    }
-  },'wpUploadProgress','wpProgressBar','wpProgressLabel');
-  renderWirePulls();
-}
+  const progressWrap = document.getElementById('drawingUploadProgress');
+  const progressBar = document.getElementById('drawingProgressBar');
+  const progressLabel = document.getElementById('drawingProgressLabel');
+  progressWrap.style.display = 'block';
 
-async function uploadPdfs(pdfs, bucket, onSuccess, progressId, barId, labelId) {
-  const progressWrap = document.getElementById(progressId);
-  const progressBar  = document.getElementById(barId);
-  const progressLabel = document.getElementById(labelId);
-  if (progressWrap) progressWrap.style.display = 'block';
   let uploaded = 0, failed = 0;
 
   for (let i = 0; i < pdfs.length; i++) {
     const file = pdfs[i];
-    // Strip .pdf extension to get the name (sheet number or panel name)
-    const name = file.name.replace(/\.pdf$/i, '').trim();
-
-    if (progressLabel) progressLabel.textContent = `Uploading ${i+1} of ${pdfs.length}: ${file.name}`;
-    if (progressBar) progressBar.style.width = Math.round((i / pdfs.length) * 100) + '%';
+    const sheetNumber = file.name.replace(/\.pdf$/i, '').trim();
+    progressLabel.textContent = `Uploading ${i + 1} of ${pdfs.length}: ${file.name}`;
+    progressBar.style.width = Math.round((i / pdfs.length) * 100) + '%';
 
     try {
-      // Use flat path — no subfolders to avoid bucket config issues
-      const path = `${currentProjectId}_${name}.pdf`;
-      const { error } = await sb.storage.from(bucket).upload(path, file, {
-        cacheControl: '3600',
-        upsert: true,
-        contentType: 'application/pdf'
+      const path = sheetNumber + '.pdf';
+      const { error: upErr } = await sb.storage.from('drawings').upload(path, file, {
+        cacheControl: '3600', upsert: true, contentType: 'application/pdf'
       });
+      if (upErr) { console.error('Upload error:', upErr); failed++; continue; }
 
-      if (error) {
-        console.error('Storage upload error:', error.message, error);
-        failed++;
-        continue;
-      }
+      const { data: urlData } = sb.storage.from('drawings').getPublicUrl(path);
+      const url = urlData.publicUrl;
 
-      const { data: urlData } = sb.storage.from(bucket).getPublicUrl(path);
-      await onSuccess(name, urlData.publicUrl);
+      // Update all assemblies with this sheet number
+      await sb.from('assemblies').update({ drawing_url: url }).eq('sheet_number', sheetNumber);
+
+      // Update local state
+      assemblies.forEach(a => { if (a.sheetNumber === sheetNumber) a.drawingUrl = url; });
+      const ex = uploadedDrawings.findIndex(d => d.sheetNumber === sheetNumber);
+      if (ex >= 0) uploadedDrawings[ex].url = url;
+      else uploadedDrawings.push({ sheetNumber, url });
       uploaded++;
-
-    } catch(e) {
-      console.error('Upload exception:', e);
-      failed++;
-    }
+    } catch(e) { console.error('Exception:', e); failed++; }
   }
 
-  if (progressBar) progressBar.style.width = '100%';
-  setTimeout(() => {
-    if (progressWrap) { progressWrap.style.display = 'none'; }
-    if (progressBar) progressBar.style.width = '0%';
-  }, 1000);
+  progressBar.style.width = '100%';
+  setTimeout(() => { progressWrap.style.display = 'none'; progressBar.style.width = '0%'; }, 1000);
 
-  const isError = failed > 0;
-  showToast(isError ? `✓ ${uploaded} uploaded · ${failed} failed` : `✓ ${uploaded} PDFs uploaded`, isError);
+  renderDrawingTable();
+  renderTable();
+  showToast(failed > 0 ? `✓ ${uploaded} uploaded · ${failed} failed` : `✓ ${uploaded} PDFs uploaded`, failed > 0);
 
-  // Auto-open the relevant section
-  try {
-    if (bucket === 'drawings') {
-      const body = document.getElementById('sheetManagerBody');
-      if (body && !body.classList.contains('open')) toggleSheetManager();
-    } else {
-      const body = document.getElementById('wpPdfBody');
-      if (body && !body.classList.contains('open')) toggleWpPdfSection();
-    }
-  } catch(e) { /* ignore toggle errors */ }
+  const body = document.getElementById('sheetManagerBody');
+  if (body && !body.classList.contains('open')) toggleSheetManager();
 }
 
 async function deleteDrawing(sheetNumber) {
-  if(!confirm('Remove drawing for '+sheetNumber+'?'))return;
-  await sb.storage.from('drawings').remove([currentProjectId+'_'+sheetNumber+'.pdf']);
-  await sb.from('assemblies').update({drawing_url:null}).eq('sheet_number',sheetNumber).eq('project_id',currentProjectId);
-  uploadedDrawings=uploadedDrawings.filter(d=>d.sheetNumber!==sheetNumber);
-  assemblies.forEach(a=>{if(a.sheetNumber===sheetNumber)a.drawingUrl='';});
+  if (!confirm('Remove drawing for ' + sheetNumber + '?')) return;
+  await sb.storage.from('drawings').remove([sheetNumber + '.pdf']);
+  await sb.from('assemblies').update({ drawing_url: null }).eq('sheet_number', sheetNumber);
+  uploadedDrawings = uploadedDrawings.filter(d => d.sheetNumber !== sheetNumber);
+  assemblies.forEach(a => { if (a.sheetNumber === sheetNumber) a.drawingUrl = ''; });
   renderDrawingTable(); renderTable(); showToast('Drawing removed');
 }
 
-// ─── MISC ─────────────────────────────────────────────────────────
-function sortTable(key){if(sortKey===key)sortAsc=!sortAsc;else{sortKey=key;sortAsc=true;}renderTable();}
+// ─── MISC ────────────────────────────────────────────────────────
+function sortTable(key) { if (sortKey === key) sortAsc = !sortAsc; else { sortKey = key; sortAsc = true; } renderTable(); }
 
 let toastTimer;
-function showToast(msg,isError=false){
-  const t=document.getElementById('toast');
-  t.textContent=msg;t.className='toast show'+(isError?' error':'');
-  clearTimeout(toastTimer);toastTimer=setTimeout(()=>t.classList.remove('show'),3200);
+function showToast(msg, isError = false) {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.className = 'toast show' + (isError ? ' error' : '');
+  clearTimeout(toastTimer); toastTimer = setTimeout(() => t.classList.remove('show'), 3200);
 }
-
-// ─── STARTUP ─────────────────────────────────────────────────────
-// Only init once — either from PIN entry or session restore
-// Do NOT call init() unconditionally here
 </script>
 </body>
 </html>
